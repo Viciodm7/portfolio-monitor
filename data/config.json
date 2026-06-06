@@ -1,0 +1,34 @@
+{
+  "target_allocation": {
+    "azionario": 75,
+    "obbligazionario": 15,
+    "oro": 10,
+    "liquidita": 0
+  },
+  "buy_the_dip_rules": {
+    "level_1": {
+      "threshold": -15,
+      "liquidity_to_use": 25,
+      "allocation": {
+        "MSCI World": 80,
+        "Emerging Markets": 20
+      }
+    },
+    "level_2": {
+      "threshold": -25,
+      "liquidity_to_use": 50,
+      "allocation": {
+        "MSCI World": 80,
+        "Emerging Markets": 20
+      }
+    },
+    "level_3": {
+      "threshold": -30,
+      "liquidity_to_use": 70,
+      "allocation": {
+        "MSCI World": 80,
+        "Emerging Markets": 20
+      }
+    }
+  }
+}
