@@ -1,0 +1,8 @@
+asset,ticker,initial_value,asset_class
+MSCI World,SWDA.MI,20257,Azionario
+Emerging Markets,XMME.MI,7340,Azionario
+Bond Globali,AGGH.MI,2988,Obbligazionario
+Oro,SGLD.MI,3866,Oro
+Tesla,TSLA,1050,Azionario Singolo
+Overnight,XFFE.MI,6335,Liquidità Tattica
+Liquidità Conto,CASH,2283,Liquidità
