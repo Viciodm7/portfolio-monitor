@@ -9,6 +9,7 @@ import yfinance as yf
 
 PORTFOLIO_FILE = "data/portfolio_initial.csv"
 CONFIG_FILE = "config.json"
+STATE_FILE = "data/portfolio_state.json"
 
 
 def load_portfolio():
@@ -17,6 +18,11 @@ def load_portfolio():
 
 def load_config():
     with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def load_state():
+    with open(STATE_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
@@ -33,20 +39,20 @@ def get_current_price(ticker):
     return float(history["Close"].iloc[-1])
 
 
-def get_initial_price(ticker):
+def get_initial_price(ticker, start_date):
     if ticker == "CASH":
         return 1.0
 
     data = yf.Ticker(ticker)
-    history = data.history(period="1y")
+    history = data.history(start=start_date)
 
     if history.empty:
-        raise ValueError(f"Nessun dato storico trovato per il ticker: {ticker}")
+        raise ValueError(f"Nessun dato storico trovato per il ticker: {ticker} dalla data {start_date}")
 
     return float(history["Close"].iloc[0])
 
 
-def calculate_current_portfolio(portfolio):
+def calculate_current_portfolio(portfolio, start_date):
     rows = []
 
     for _, row in portfolio.iterrows():
@@ -59,7 +65,7 @@ def calculate_current_portfolio(portfolio):
             current_value = initial_value
             variation_pct = 0.0
         else:
-            initial_price = get_initial_price(ticker)
+            initial_price = get_initial_price(ticker, start_date)
             current_price = get_current_price(ticker)
 
             variation_pct = ((current_price / initial_price) - 1) * 100
@@ -294,9 +300,12 @@ def send_telegram(report):
 
 def main():
     portfolio = load_portfolio()
-    config = load_config()
+config = load_config()
+state = load_state()
 
-    current_portfolio = calculate_current_portfolio(portfolio)
+start_date = state["portfolio_start_date"]
+
+current_portfolio = calculate_current_portfolio(portfolio, start_date)
     kpi = calculate_kpi(current_portfolio)
     drawdown = calculate_msci_world_drawdown()
     alerts = generate_alerts(kpi, drawdown)
