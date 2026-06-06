@@ -47,7 +47,9 @@ def get_initial_price(ticker, start_date):
     history = data.history(start=start_date)
 
     if history.empty:
-        raise ValueError(f"Nessun dato storico trovato per il ticker: {ticker} dalla data {start_date}")
+        raise ValueError(
+            f"Nessun dato storico trovato per il ticker: {ticker} dalla data {start_date}"
+        )
 
     return float(history["Close"].iloc[0])
 
@@ -71,14 +73,16 @@ def calculate_current_portfolio(portfolio, start_date):
             variation_pct = ((current_price / initial_price) - 1) * 100
             current_value = initial_value * (current_price / initial_price)
 
-        rows.append({
-            "asset": asset,
-            "ticker": ticker,
-            "asset_class": asset_class,
-            "initial_value": initial_value,
-            "current_value": current_value,
-            "variation_pct": variation_pct
-        })
+        rows.append(
+            {
+                "asset": asset,
+                "ticker": ticker,
+                "asset_class": asset_class,
+                "initial_value": initial_value,
+                "current_value": current_value,
+                "variation_pct": variation_pct,
+            }
+        )
 
     result = pd.DataFrame(rows)
     total_value = result["current_value"].sum()
@@ -98,9 +102,9 @@ def calculate_kpi(current_portfolio):
         current_portfolio["asset_class"] == "Obbligazionario"
     ]["current_value"].sum()
 
-    oro = current_portfolio[
-        current_portfolio["asset_class"] == "Oro"
-    ]["current_value"].sum()
+    oro = current_portfolio[current_portfolio["asset_class"] == "Oro"][
+        "current_value"
+    ].sum()
 
     liquidita = current_portfolio[
         current_portfolio["asset_class"].str.contains("Liquidità")
@@ -112,7 +116,7 @@ def calculate_kpi(current_portfolio):
         "bond_pct": bond / total * 100,
         "oro_pct": oro / total * 100,
         "liquidita_pct": liquidita / total * 100,
-        "liquidita_value": liquidita
+        "liquidita_value": liquidita,
     }
 
 
@@ -150,9 +154,7 @@ def generate_alerts(kpi, drawdown):
         )
 
     if drawdown is not None and drawdown <= -15:
-        alerts.append(
-            f"MSCI World in drawdown rilevante: {drawdown:.1f}%."
-        )
+        alerts.append(f"MSCI World in drawdown rilevante: {drawdown:.1f}%.")
 
     return alerts
 
@@ -178,7 +180,7 @@ def generate_action(config, kpi, drawdown):
         return [
             "Nessuna azione da compiere.",
             "Nessun trigger Buy-The-Dip attivo.",
-            "Continuare il PAC ordinario senza usare liquidità tattica."
+            "Continuare il PAC ordinario senza usare liquidità tattica.",
         ]
 
     amount_to_use = liquidita * rule["liquidity_to_use"] / 100
@@ -188,16 +190,15 @@ def generate_action(config, kpi, drawdown):
     return [
         f"Trigger Buy-The-Dip {level} attivato.",
         f"Usare il {rule['liquidity_to_use']}% della liquidità tattica disponibile.",
-        f"Importo totale da investire: {amount_to_use:.2f} €.",
-        f"Acquistare MSCI World per circa {msci_amount:.2f} €.",
-        f"Acquistare Emerging Markets per circa {em_amount:.2f} €.",
-        "Non utilizzare ulteriore liquidità oltre questa soglia."
+        f"Importo totale da investire: {amount_to_use:.2f} euro.",
+        f"Acquistare MSCI World per circa {msci_amount:.2f} euro.",
+        f"Acquistare Emerging Markets per circa {em_amount:.2f} euro.",
+        "Non utilizzare ulteriore liquidità oltre questa soglia.",
     ]
 
 
 def generate_report(current_portfolio, kpi, alerts, actions, drawdown):
     today = datetime.now().strftime("%d/%m/%Y")
-
     drawdown_text = "non disponibile" if drawdown is None else f"{drawdown:.1f}%"
 
     report = f"""REPORT PORTAFOGLIO
@@ -289,7 +290,7 @@ def send_telegram(report):
 
     payload = {
         "chat_id": chat_id,
-        "text": report[:3900]
+        "text": report[:3900],
     }
 
     response = requests.post(url, data=payload, timeout=20)
@@ -300,12 +301,12 @@ def send_telegram(report):
 
 def main():
     portfolio = load_portfolio()
-config = load_config()
-state = load_state()
+    config = load_config()
+    state = load_state()
 
-start_date = state["portfolio_start_date"]
+    start_date = state["portfolio_start_date"]
 
-current_portfolio = calculate_current_portfolio(portfolio, start_date)
+    current_portfolio = calculate_current_portfolio(portfolio, start_date)
     kpi = calculate_kpi(current_portfolio)
     drawdown = calculate_msci_world_drawdown()
     alerts = generate_alerts(kpi, drawdown)
