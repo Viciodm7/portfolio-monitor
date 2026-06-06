@@ -199,75 +199,106 @@ def generate_action(config, kpi, drawdown):
 
 def generate_report(current_portfolio, kpi, alerts, actions, drawdown):
     today = datetime.now().strftime("%d/%m/%Y")
-    drawdown_text = "non disponibile" if drawdown is None else f"{drawdown:.1f}%"
+    drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
 
-    report = f"""REPORT PORTAFOGLIO
-Data report: {today}
+    has_operational_action = not (
+        len(actions) >= 1 and actions[0] == "Nessuna azione da compiere."
+    )
 
-EXECUTIVE SUMMARY
+    status_icon = "🟡" if alerts else "🟢"
+    status_text = "ATTENZIONE" if alerts else "BUONO"
 
-Stato complessivo: {"ATTENZIONE" if alerts else "BUONO"}
+    action_icon = "🎯"
+    action_title = "AZIONE OPERATIVA"
 
-Il portafoglio è stato aggiornato partendo dalla composizione iniziale e applicando le variazioni di mercato rilevate sui ticker.
+    report = f"""📊 PORTFOLIO RADAR
+Data: {today}
 
-STATO ATTUALE
+━━━━━━━━━━━━━━
 
-Valore totale stimato: {kpi["total"]:.2f} euro
+{status_icon} STATO GENERALE
+{status_text}
 
-Asset:
+{action_icon} {action_title}
+"""
+
+    if has_operational_action:
+        for action in actions:
+            report += f"• {action}\n"
+    else:
+        report += "NESSUNA AZIONE DA COMPIERE\n"
+        report += "Continuare il PAC ordinario.\n"
+        report += "Non usare liquidità tattica.\n"
+
+    report += f"""
+━━━━━━━━━━━━━━
+
+💰 VALORE PORTAFOGLIO
+{kpi["total"]:.2f} €
+
+Variazione da inizio monitoraggio:
+0,0%
+
+━━━━━━━━━━━━━━
+
+⚖️ ASSET ALLOCATION
+
+Azionario: {kpi["azionario_pct"]:.1f}%
+Bond: {kpi["bond_pct"]:.1f}%
+Oro: {kpi["oro_pct"]:.1f}%
+Liquidità / Overnight: {kpi["liquidita_pct"]:.1f}%
+
+━━━━━━━━━━━━━━
+
+📉 MERCATI
+
+MSCI World drawdown:
+{drawdown_text}
+
+Buy-The-Dip:
+{"ATTIVO" if has_operational_action else "NON ATTIVO"}
+
+━━━━━━━━━━━━━━
+
+📦 COMPOSIZIONE
+
 """
 
     for _, row in current_portfolio.iterrows():
         report += (
-            f"- {row['asset']}: "
-            f"{row['current_value']:.2f} euro | "
-            f"peso {row['weight']:.1f}% | "
-            f"variazione stimata {row['variation_pct']:.1f}%\n"
+            f"• {row['asset']}: "
+            f"{row['current_value']:.0f} € "
+            f"({row['weight']:.1f}%)\n"
         )
 
-    report += f"""
-
-ASSET ALLOCATION
-
-- Azionario: {kpi["azionario_pct"]:.1f}%
-- Obbligazionario: {kpi["bond_pct"]:.1f}%
-- Oro: {kpi["oro_pct"]:.1f}%
-- Liquidità / Overnight: {kpi["liquidita_pct"]:.1f}%
-
-DRAWDOWN MSCI WORLD
-
-- Drawdown stimato a 12 mesi: {drawdown_text}
-
-ALERT
-"""
+    report += "\n━━━━━━━━━━━━━━\n\n⚠️ ELEMENTI DA MONITORARE\n"
 
     if alerts:
         for alert in alerts:
-            report += f"- {alert}\n"
+            report += f"• {alert}\n"
     else:
-        report += "- Nessun alert operativo.\n"
-
-    report += "\nAZIONE DA METTERE IN ATTO\n"
-
-    for action in actions:
-        report += f"- {action}\n"
+        report += "• Nessun alert operativo.\n"
 
     report += """
+━━━━━━━━━━━━━━
 
-AZIONI DA EVITARE
+🚫 AZIONI DA EVITARE
 
-- Non usare liquidità tattica se non è attivo un trigger Buy-The-Dip.
-- Non effettuare vendite discrezionali.
-- Non modificare il PAC ordinario senza una regola esplicita.
-- Non inseguire il mercato sulla base di notizie settimanali.
+• Non usare liquidità tattica senza trigger.
+• Non effettuare vendite discrezionali.
+• Non modificare il PAC senza regola.
+• Non inseguire notizie settimanali.
 
-CONCLUSIONE
+━━━━━━━━━━━━━━
 
-Il report applica solo regole operative predefinite. Se nessuna soglia è attiva, l'indicazione corretta è non fare nulla.
+📌 CONCLUSIONE
+
+Strategia invariata.
+Il sistema applica solo regole operative predefinite.
+Se nessuna soglia è attiva, la scelta corretta è non fare nulla.
 """
 
     return report
-
 
 def save_report(report):
     os.makedirs("reports", exist_ok=True)
