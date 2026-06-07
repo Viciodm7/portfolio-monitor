@@ -1,63 +1,38 @@
 [
   {
     "event": "FED",
-    "date": "Prossimi 30 giorni",
-    "why_it_matters": "Il portafoglio ha forte esposizione a USA, tecnologia e dollaro.",
-    "what_to_monitor": [
-      "Decisione sui tassi",
-      "Tono della conferenza stampa",
-      "Indicazioni sui futuri tagli"
-    ],
-    "potential_impact": [
-      "FED accomodante: supporto a MSCI World, tecnologia USA e Tesla",
-      "FED restrittiva: possibile pressione su growth, Nasdaq e Magnificent 7"
-    ],
+    "category": "Macro USA",
+    "relevance": "Alta",
+    "why_it_matters": "Impatta tassi, dollaro, tecnologia USA, MSCI World e Tesla.",
+    "positive_impact": "Tono accomodante o tagli attesi possono sostenere azionario growth e tecnologia.",
+    "negative_impact": "Tono restrittivo o tassi più alti del previsto possono penalizzare Nasdaq, Magnificent 7 e Tesla.",
     "action": "Nessuna azione preventiva. Agire solo se il drawdown MSCI World raggiunge le soglie Buy-The-Dip."
   },
   {
     "event": "Inflazione USA",
-    "date": "Prossimi 30 giorni",
-    "why_it_matters": "Influenza aspettative sui tassi e valutazioni dei titoli growth.",
-    "what_to_monitor": [
-      "Dato effettivo rispetto alle attese",
-      "Inflazione core",
-      "Reazione del mercato obbligazionario"
-    ],
-    "potential_impact": [
-      "Inflazione sotto attese: positiva per azionario growth",
-      "Inflazione sopra attese: pressione su tecnologia e bond"
-    ],
-    "action": "Nessuna azione. Monitoraggio finalizzato ai trigger Buy-The-Dip."
+    "category": "Macro USA",
+    "relevance": "Alta",
+    "why_it_matters": "Condiziona le aspettative sui tassi FED e le valutazioni dei titoli growth.",
+    "positive_impact": "Inflazione sotto le attese può favorire azioni growth, tecnologia e bond.",
+    "negative_impact": "Inflazione sopra le attese può spingere i tassi al rialzo e pesare su tecnologia e obbligazionario.",
+    "action": "Monitorare. Nessuna azione se non vengono attivati trigger Buy-The-Dip."
   },
   {
     "event": "BCE",
-    "date": "Prossimi 30 giorni",
-    "why_it_matters": "Impatta bond globali, euro e condizioni finanziarie europee.",
-    "what_to_monitor": [
-      "Decisione sui tassi",
-      "Tono della Lagarde",
-      "Indicazioni su inflazione Eurozona"
-    ],
-    "potential_impact": [
-      "Toni accomodanti: supporto a bond",
-      "Toni restrittivi: possibile pressione su obbligazionario"
-    ],
+    "category": "Macro Europa",
+    "relevance": "Media",
+    "why_it_matters": "Impatta euro, obbligazionario europeo e condizioni finanziarie dell'area euro.",
+    "positive_impact": "Toni accomodanti possono sostenere la componente obbligazionaria.",
+    "negative_impact": "Toni restrittivi possono pesare sui bond e sul sentiment europeo.",
     "action": "Nessuna azione operativa."
   },
   {
-    "event": "Trimestrali Big Tech / AI",
-    "date": "Prossimi 30-90 giorni",
-    "why_it_matters": "Microsoft, Nvidia, Apple, Amazon, Meta e Alphabet sono tra le società che muovono maggiormente il portafoglio.",
-    "what_to_monitor": [
-      "Ricavi AI",
-      "Guidance",
-      "Margini",
-      "Capex cloud e semiconduttori"
-    ],
-    "potential_impact": [
-      "Guidance forte: supporto a MSCI World, Quality e Momentum",
-      "Guidance debole: possibile correzione comparto AI"
-    ],
-    "action": "Nessuna azione immediata. Valutare solo l'impatto sul drawdown complessivo."
+    "event": "Big Tech / AI",
+    "category": "Trimestrali",
+    "relevance": "Alta",
+    "why_it_matters": "Microsoft, Nvidia, Apple, Amazon, Meta, Alphabet e Tesla muovono una parte rilevante del portafoglio.",
+    "positive_impact": "Guidance forte può sostenere MSCI World, tecnologia, Quality e Momentum.",
+    "negative_impact": "Guidance debole può generare correzioni sul comparto AI e sulle Magnificent 7.",
+    "action": "Nessuna azione immediata. Valutare solo l'impatto su drawdown e trigger operativi."
   }
 ]
