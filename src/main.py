@@ -191,11 +191,11 @@ def calculate_kpi(current_portfolio, initial_total, pac_total, manual_total):
         "bond_pct": bond / total * 100,
         "oro_pct": oro / total * 100,
         "liquidita_pct": liquidita / total * 100,
-        "liquidita_value": liquidita
+        "liquidita_value": liquidita,
         "invested_total": invested_total,
         "azionario_invested_pct": azionario_invested_pct,
         "bond_invested_pct": bond_invested_pct,
-        "oro_invested_pct": oro_invested_pct,
+        "oro_invested_pct": oro_invested_pct
     }
 
 
