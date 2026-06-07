@@ -173,6 +173,12 @@ def calculate_kpi(current_portfolio, initial_total, pac_total, manual_total):
         current_portfolio["asset_class"].str.contains("Liquidità")
     ]["current_value"].sum()
 
+    invested_total = total - liquidita
+
+    azionario_invested_pct = azionario / invested_total * 100 if invested_total else 0
+    bond_invested_pct = bond / invested_total * 100 if invested_total else 0
+    oro_invested_pct = oro / invested_total * 100 if invested_total else 0
+
     return {
         "total": total,
         "initial_total": initial_total,
@@ -186,6 +192,10 @@ def calculate_kpi(current_portfolio, initial_total, pac_total, manual_total):
         "oro_pct": oro / total * 100,
         "liquidita_pct": liquidita / total * 100,
         "liquidita_value": liquidita
+        "invested_total": invested_total,
+        "azionario_invested_pct": azionario_invested_pct,
+        "bond_invested_pct": bond_invested_pct,
+        "oro_invested_pct": oro_invested_pct,
     }
 
 
@@ -315,11 +325,11 @@ def enrich_btd_action(config, btd_status, liquidity_value):
 def generate_alerts(kpi, btd_status):
     alerts = []
 
-    if abs(kpi["azionario_pct"] - 80) > 5:
-        alerts.append(f"Azionario distante dal target 80%: attuale {kpi['azionario_pct']:.1f}%.")
+    if abs(kpi["azionario_invested_pct"] - 80) > 5:
+    alerts.append(f"Azionario distante dal target 80% sul capitale investito: attuale {kpi['azionario_invested_pct']:.1f}%.")
 
-    if kpi["bond_pct"] < 10:
-        alerts.append(f"Bond sotto soglia informativa: attuale {kpi['bond_pct']:.1f}%.")
+    if kpi["bond_invested_pct"] < 7:
+    alerts.append(f"Bond sotto soglia sul capitale investito: attuale {kpi['bond_invested_pct']:.1f}%.")
 
     if kpi["oro_pct"] < 8:
         alerts.append(f"Oro sotto soglia informativa: attuale {kpi['oro_pct']:.1f}%.")
@@ -336,9 +346,9 @@ def generate_alerts(kpi, btd_status):
 def calculate_health_score(kpi, btd_status):
     score = 100
 
-    score -= min(abs(kpi["azionario_pct"] - 80) * 1.0, 15)
-    score -= min(abs(kpi["bond_pct"] - 10) * 1.2, 15)
-    score -= min(abs(kpi["oro_pct"] - 10) * 1.0, 10)
+    score -= min(abs(kpi["azionario_invested_pct"] - 80) * 1.0, 15)
+    score -= min(abs(kpi["bond_invested_pct"] - 10) * 1.2, 15)
+    score -= min(abs(kpi["oro_invested_pct"] - 10) * 1.0, 10)
 
     if btd_status["level"] == "watch":
         score -= 5
@@ -396,23 +406,23 @@ def generate_dynamic_conclusions(kpi, btd_status, pac_count):
     warnings = []
     actions = []
 
-    if abs(kpi["azionario_pct"] - 80) <= 5:
+    if abs(kpi["azionario_invested_pct"] - 80) <= 5:
         conclusions.append("✓ La componente azionaria è coerente con il target strategico.")
-    elif kpi["azionario_pct"] < 75:
-        warnings.append(f"⚠️ Azionario sotto target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%.")
+    elif kpi["azionario_invested_pct"] < 75:
+        warnings.append(f"⚠️ Azionario sotto target: {kpi['azionario_invested_pct']:.1f}% rispetto all'obiettivo 80%.")
     else:
         warnings.append(f"⚠️ Azionario sopra target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%.")
 
-    if abs(kpi["bond_pct"] - 10) <= 3:
+    if abs(kpi["bond_invested_pct"] - 10) <= 3:
         conclusions.append("✓ La componente obbligazionaria è vicina al target.")
-    elif kpi["bond_pct"] < 7:
+    elif kpi["bond_invested_pct"] < 7:
         warnings.append(f"⚠️ Bond sotto soglia: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
     else:
         warnings.append(f"⚠️ Bond sopra target: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
 
-    if abs(kpi["oro_pct"] - 10) <= 3:
+    if abs(kpi["oro_invested_pct"] - 10) <= 3:
         conclusions.append("✓ Materie prime in area coerente con il target.")
-    elif kpi["oro_pct"] < 7:
+    elif kpi["oro_invested_pct"]] < 7:
         warnings.append(f"⚠️ Materie prime sotto soglia: {kpi['oro_pct']:.1f}% rispetto al target 10%.")
     else:
         warnings.append(f"⚠️ Materie prime sopra target: {kpi['oro_pct']:.1f}% rispetto al target 10%.")
