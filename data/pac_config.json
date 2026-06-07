@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "start_date": "2026-07-01",
+  "day_of_month": 1,
+  "monthly_amounts": {
+    "MSCI World": 350,
+    "Bond Globali": 100,
+    "Emerging Markets": 50,
+    "Overnight": 100
+  }
+}
