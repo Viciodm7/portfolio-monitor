@@ -315,8 +315,8 @@ def enrich_btd_action(config, btd_status, liquidity_value):
 def generate_alerts(kpi, btd_status):
     alerts = []
 
-    if abs(kpi["azionario_pct"] - 75) > 5:
-        alerts.append(f"Azionario distante dal target 75%: attuale {kpi['azionario_pct']:.1f}%.")
+    if abs(kpi["azionario_pct"] - 80) > 5:
+        alerts.append(f"Azionario distante dal target 80%: attuale {kpi['azionario_pct']:.1f}%.")
 
     if kpi["bond_pct"] < 10:
         alerts.append(f"Bond sotto soglia informativa: attuale {kpi['bond_pct']:.1f}%.")
@@ -336,8 +336,8 @@ def generate_alerts(kpi, btd_status):
 def calculate_health_score(kpi, btd_status):
     score = 100
 
-    score -= min(abs(kpi["azionario_pct"] - 75) * 1.0, 15)
-    score -= min(abs(kpi["bond_pct"] - 15) * 1.2, 15)
+    score -= min(abs(kpi["azionario_pct"] - 80) * 1.0, 15)
+    score -= min(abs(kpi["bond_pct"] - 10) * 1.2, 15)
     score -= min(abs(kpi["oro_pct"] - 10) * 1.0, 10)
 
     if btd_status["level"] == "watch":
@@ -407,8 +407,8 @@ Performance da inizio monitoraggio:
 
 ⚖️ ALLOCAZIONE STRATEGICA
 
-Azionario: {kpi["azionario_pct"]:.1f}% / target 75%
-Bond: {kpi["bond_pct"]:.1f}% / target 15%
+Azionario: {kpi["azionario_pct"]:.1f}% / target 80%
+Bond: {kpi["bond_pct"]:.1f}% / target 10%
 Oro: {kpi["oro_pct"]:.1f}% / target 10%
 Liquidità / Overnight: {kpi["liquidita_pct"]:.1f}%
 
