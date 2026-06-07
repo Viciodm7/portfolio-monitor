@@ -1,27 +1,114 @@
 {
-  "geography": {
-    "USA": 53,
-    "Europa": 18,
-    "Emergenti": 14,
-    "Asia Pacifico": 11,
-    "Altro": 4
+  "asset_models": {
+    "MSCI World": {
+      "geography": {
+        "USA": 72,
+        "Europa": 17,
+        "Giappone": 6,
+        "Asia Pacifico": 3,
+        "Altro": 2
+      },
+      "sectors": {
+        "Tecnologia": 26,
+        "Finanziari": 16,
+        "Healthcare": 12,
+        "Industriali": 11,
+        "Consumer": 10,
+        "Comunicazioni": 8,
+        "Altro": 17
+      },
+      "companies": {
+        "Microsoft": 4.8,
+        "Nvidia": 4.5,
+        "Apple": 4.2,
+        "Amazon": 2.8,
+        "Meta": 2.0,
+        "Alphabet": 1.9,
+        "Tesla": 1.2
+      }
+    },
+    "Emerging Markets": {
+      "geography": {
+        "Cina": 25,
+        "India": 21,
+        "Taiwan": 18,
+        "Corea": 12,
+        "Brasile": 5,
+        "Arabia Saudita": 4,
+        "Altro": 15
+      },
+      "sectors": {
+        "Tecnologia": 23,
+        "Finanziari": 22,
+        "Consumer": 13,
+        "Comunicazioni": 9,
+        "Industriali": 7,
+        "Materie prime": 6,
+        "Altro": 20
+      },
+      "companies": {
+        "TSMC": 8.5,
+        "Tencent": 4.0,
+        "Samsung": 3.5,
+        "Alibaba": 2.2,
+        "Infosys": 1.2
+      }
+    },
+    "Bond Globali": {
+      "geography": {
+        "Globale Obbligazionario": 100
+      },
+      "sectors": {
+        "Obbligazionario": 100
+      },
+      "companies": {}
+    },
+    "Oro": {
+      "geography": {
+        "Materie prime": 100
+      },
+      "sectors": {
+        "Oro": 100
+      },
+      "companies": {}
+    },
+    "Tesla": {
+      "geography": {
+        "USA": 100
+      },
+      "sectors": {
+        "Consumer": 100
+      },
+      "companies": {
+        "Tesla": 100
+      }
+    },
+    "Overnight": {
+      "geography": {
+        "Euro Liquidità": 100
+      },
+      "sectors": {
+        "Liquidità": 100
+      },
+      "companies": {}
+    },
+    "Liquidità Conto": {
+      "geography": {
+        "Euro Liquidità": 100
+      },
+      "sectors": {
+        "Liquidità": 100
+      },
+      "companies": {}
+    }
   },
-  "sectors": {
-    "Tecnologia": 26,
-    "Finanziari": 15,
-    "Healthcare": 11,
-    "Industriali": 10,
-    "Consumer": 9,
-    "Altro": 29
-  },
-  "dominant_companies": {
-    "Microsoft": 3.8,
-    "Nvidia": 3.5,
-    "Apple": 3.3,
-    "Tesla": 2.4,
-    "Amazon": 2.1,
-    "Meta": 1.4,
-    "Alphabet": 1.3
-  },
-  "magnificent_7_weight": 15.7
+  "magnificent_7": [
+    "Microsoft",
+    "Nvidia",
+    "Apple",
+    "Amazon",
+    "Meta",
+    "Alphabet",
+    "Tesla"
+  ]
 }
