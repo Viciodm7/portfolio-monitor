@@ -363,7 +363,7 @@ def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, bt
     status_icon = "🟢" if health_score >= 80 else "🟡" if health_score >= 65 else "🔴"
     status_text = "BUONO" if health_score >= 80 else "ATTENZIONE" if health_score >= 65 else "CRITICO"
 
-    action_text = "\n".join([f"• {action}" for action in actions])
+    dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
 
     report = f"""📊 PORTFOLIO RADAR
 📅 {today}
@@ -378,9 +378,12 @@ Valutazione: {status_text}
 ━━━━━━━━━━━━━━━━━━
 
 🎯 AZIONE OPERATIVA
+"""
 
-{action_text}
+    for action in actions:
+        report += f"• {action}\n"
 
+    report += f"""
 ━━━━━━━━━━━━━━━━━━
 
 💰 PATRIMONIO
@@ -388,33 +391,24 @@ Valutazione: {status_text}
 Valore attuale:
 {format_money(kpi["total"])}
 
-Capitale iniziale:
-{format_money(kpi["initial_total"])}
-
-PAC accumulati:
-{format_money(kpi["pac_total"])}
-
-Extra manuali:
-{format_money(kpi["manual_total"])}
-
 Effetto mercato:
 {format_money(kpi["market_effect"])}
 
-Performance da inizio monitoraggio:
+Performance:
 {kpi["performance_pct"]:.2f}%
 
 ━━━━━━━━━━━━━━━━━━
 
-⚖️ ALLOCAZIONE STRATEGICA
+⚖️ ALLOCAZIONE
 
 Azionario: {kpi["azionario_pct"]:.1f}% / target 80%
 Bond: {kpi["bond_pct"]:.1f}% / target 10%
-Oro: {kpi["oro_pct"]:.1f}% / target 10%
-Liquidità / Overnight: {kpi["liquidita_pct"]:.1f}%
+Materie prime: {kpi["oro_pct"]:.1f}% / target 10%
+Liquidità: {kpi["liquidita_pct"]:.1f}%
 
 ━━━━━━━━━━━━━━━━━━
 
-📉 BUY-THE-DIP RADAR
+📉 BUY-THE-DIP
 
 MSCI World drawdown:
 {drawdown_text}
@@ -422,85 +416,25 @@ MSCI World drawdown:
 Stato:
 {btd_status["label"]}
 
-Messaggio:
-{btd_status["message"]}
-
-Liquidità tattica stimata:
+Liquidità tattica:
 {format_money(kpi["liquidita_value"])}
 
 ━━━━━━━━━━━━━━━━━━
 
-📦 COMPOSIZIONE
+🌍 RISCHIO SINTETICO
 
-"""
+USA:
+{exposure["geography"].get("USA", 0):.1f}%
 
-    for _, row in current_portfolio.iterrows():
-        report += f"• {row['asset']}: {format_money(row['current_value'])} ({row['weight']:.1f}%)\n"
+Tecnologia:
+{exposure["sectors"].get("Tecnologia", 0):.1f}%
 
-        report += """
-━━━━━━━━━━━━━━━━━━
-
-🌍 ESPOSIZIONE REALE
-
-Geografia:
-"""
-
-    for area, value in exposure["geography"].items():
-        report += f"• {area}: {value:.1f}%\n"
-
-    report += "\nSettori:\n"
-
-    for sector, value in exposure["sectors"].items():
-        report += f"• {sector}: {value:.1f}%\n"
-
-    report += f"""
-Concentrazione Magnificent 7:
+Magnificent 7:
 {exposure["magnificent_7_weight"]:.1f}%
 
 ━━━━━━━━━━━━━━━━━━
 
-🏢 AZIENDE CHE MUOVONO IL PORTAFOGLIO
-
-"""
-
-    for company, value in exposure["dominant_companies"].items():
-        report += f"• {company}: {value:.1f}%\n"
-
-    report += """
-━━━━━━━━━━━━━━━━━━
-
-📅 EVENTI DA MONITORARE
-
-"""
-
-    for event in events:
-        report += f"""▶ {event["event"]}
-Quando: {event["date"]}
-
-Perché conta:
-{event["why_it_matters"]}
-
-Cosa monitorare:
-"""
-        for item in event["what_to_monitor"]:
-            report += f"• {item}\n"
-
-        report += "\nPossibile impatto:\n"
-
-        for item in event["potential_impact"]:
-            report += f"• {item}\n"
-
-        report += f"""
-Azione prevista:
-{event["action"]}
-
----
-"""
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
 ⚠️ ELEMENTI DA MONITORARE
-
 """
 
     if alerts:
@@ -512,33 +446,17 @@ Azione prevista:
     report += """
 ━━━━━━━━━━━━━━━━━━
 
-📒 OPERAZIONI STRAORDINARIE
-
+📅 EVENTI CHIAVE
 """
 
-    if manual_transactions.empty:
-        report += "Nessuna operazione straordinaria registrata.\n"
-    else:
-        recent_transactions = manual_transactions.tail(5)
+    for event in events[:4]:
+        report += f"""
+▶ {event["event"]}
+• Impatto: {event["potential_impact"][0]}
+• Azione: {event["action"]}
+"""
 
-        for _, tx in recent_transactions.iterrows():
-            report += (
-                f"• {tx['date']} — "
-                f"{tx['asset']} — "
-                f"{format_money(float(tx['amount']))} — "
-                f"{tx['source']}\n"
-            )
-    report += f"""
-━━━━━━━━━━━━━━━━━━
-
-📜 STORIA DELLA STRATEGIA
-
-PAC mensili conteggiati:
-{pac_count}
-
-Ultima operazione straordinaria:
-Non registrata
-
+    report += """
 ━━━━━━━━━━━━━━━━━━
 
 📌 CONCLUSIONI SETTIMANALI
@@ -546,8 +464,6 @@ Non registrata
 Osservazioni positive:
 """
 
-    dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
-
     for item in dynamic["conclusions"]:
         report += f"• {item}\n"
 
@@ -565,252 +481,6 @@ Osservazioni positive:
         report += f"• {item}\n"
 
     return report
-
-def calculate_dynamic_exposure(current_portfolio, exposure_model):
-    geography = {}
-    sectors = {}
-    companies = {}
-
-    asset_models = exposure_model["asset_models"]
-
-    for _, row in current_portfolio.iterrows():
-        asset = row["asset"]
-        portfolio_weight = float(row["weight"])
-
-        if asset not in asset_models:
-            continue
-
-        model = asset_models[asset]
-
-        for area, weight in model.get("geography", {}).items():
-            geography[area] = geography.get(area, 0.0) + portfolio_weight * weight / 100
-
-        for sector, weight in model.get("sectors", {}).items():
-            sectors[sector] = sectors.get(sector, 0.0) + portfolio_weight * weight / 100
-
-        for company, weight in model.get("companies", {}).items():
-            companies[company] = companies.get(company, 0.0) + portfolio_weight * weight / 100
-
-    magnificent_7 = exposure_model.get("magnificent_7", [])
-    magnificent_7_weight = sum(companies.get(company, 0.0) for company in magnificent_7)
-
-    geography = dict(sorted(geography.items(), key=lambda x: x[1], reverse=True))
-    sectors = dict(sorted(sectors.items(), key=lambda x: x[1], reverse=True))
-    companies = dict(sorted(companies.items(), key=lambda x: x[1], reverse=True))
-
-    return {
-        "geography": geography,
-        "sectors": sectors,
-        "dominant_companies": companies,
-        "magnificent_7_weight": magnificent_7_weight
-    }
-
-def generate_dynamic_conclusions(kpi, btd_status, pac_count):
-    conclusions = []
-    warnings = []
-    actions = []
-
-    # Asset allocation
-    if abs(kpi["azionario_pct"] - 80) <= 5:
-        conclusions.append("✓ La componente azionaria è coerente con il target strategico.")
-    elif kpi["azionario_pct"] < 75:
-        warnings.append(
-            f"⚠️ Azionario sotto target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%."
-        )
-    else:
-        warnings.append(
-            f"⚠️ Azionario sopra target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%."
-        )
-
-    if abs(kpi["bond_pct"] - 10) <= 3:
-        conclusions.append("✓ La componente obbligazionaria è vicina al target.")
-    elif kpi["bond_pct"] < 7:
-        warnings.append(
-            f"⚠️ Bond sotto soglia: {kpi['bond_pct']:.1f}% rispetto al target 10%."
-        )
-    else:
-        warnings.append(
-            f"⚠️ Bond sopra target: {kpi['bond_pct']:.1f}% rispetto al target 10%."
-        )
-
-    if abs(kpi["oro_pct"] - 10) <= 3:
-        conclusions.append("✓ Materie prime in area coerente con il target.")
-    elif kpi["oro_pct"] < 7:
-        warnings.append(
-            f"⚠️ Materie prime sotto soglia: {kpi['oro_pct']:.1f}% rispetto al target 10%."
-        )
-    else:
-        warnings.append(
-            f"⚠️ Materie prime sopra target: {kpi['oro_pct']:.1f}% rispetto al target 10%."
-        )
-
-    # Performance
-    if kpi["performance_pct"] > 2:
-        conclusions.append(
-            f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}% da inizio monitoraggio."
-        )
-    elif kpi["performance_pct"] < -2:
-        warnings.append(
-            f"⚠️ Effetto mercato negativo: {kpi['performance_pct']:.2f}% da inizio monitoraggio."
-        )
-    else:
-        conclusions.append(
-            f"✓ Effetto mercato contenuto: {kpi['performance_pct']:.2f}% da inizio monitoraggio."
-        )
-
-    # PAC
-    if pac_count > 0:
-        conclusions.append(
-            f"✓ PAC regolare conteggiato: {pac_count} mensilità registrate."
-        )
-    else:
-        warnings.append("⚠️ Nessun PAC mensile ancora conteggiato.")
-
-    # Buy The Dip
-    if btd_status["is_action"]:
-        warnings.append(f"🚨 Trigger Buy-The-Dip {btd_status['label']} attivo.")
-        actions.append("Applicare l'azione operativa prevista dalla strategia Buy-The-Dip.")
-    elif btd_status["level"] in ["watch", "attention", "pre_trigger"]:
-        warnings.append(f"⚠️ Buy-The-Dip {btd_status['label']}: {btd_status['message']}")
-        actions.append("Prepararsi, ma non effettuare acquisti anticipati.")
-    else:
-        conclusions.append("✓ Nessun trigger Buy-The-Dip attivo.")
-        actions.append("Nessuna azione da compiere.")
-
-    # Liquidità
-    if kpi["liquidita_pct"] > 20:
-        warnings.append(
-            f"⚠️ Liquidità elevata: {kpi['liquidita_pct']:.1f}% del portafoglio."
-        )
-    elif kpi["liquidita_pct"] < 2:
-        warnings.append(
-            f"⚠️ Liquidità molto bassa: {kpi['liquidita_pct']:.1f}% del portafoglio."
-        )
-    else:
-        conclusions.append(
-            f"✓ Liquidità tattica disponibile: {kpi['liquidita_pct']:.1f}%."
-        )
-
-    return {
-        "conclusions": conclusions,
-        "warnings": warnings,
-        "actions": actions
-    }
-
-def generate_monthly_report(current_portfolio, kpi, pac_count, manual_transactions, btd_status):
-    today = datetime.now().strftime("%d/%m/%Y")
-
-    report = f"""📆 REPORT MENSILE PORTAFOGLIO
-📅 {today}
-
-━━━━━━━━━━━━━━━━━━
-
-💰 PATRIMONIO
-
-Valore attuale:
-{format_money(kpi["total"])}
-
-Capitale iniziale:
-{format_money(kpi["initial_total"])}
-
-PAC accumulati:
-{format_money(kpi["pac_total"])}
-
-Extra manuali:
-{format_money(kpi["manual_total"])}
-
-Effetto mercato:
-{format_money(kpi["market_effect"])}
-
-Performance da inizio monitoraggio:
-{kpi["performance_pct"]:.2f}%
-
-━━━━━━━━━━━━━━━━━━
-
-💶 PAC
-
-PAC mensili conteggiati:
-{pac_count}
-
-PAC totale versato:
-{format_money(kpi["pac_total"])}
-
-Media mensile PAC:
-{format_money(kpi["pac_total"] / pac_count if pac_count else 0)}
-
-━━━━━━━━━━━━━━━━━━
-
-⚖️ ASSET ALLOCATION
-
-Azionario:
-{kpi["azionario_pct"]:.1f}% / target 80%
-
-Bond:
-{kpi["bond_pct"]:.1f}% / target 10%
-
-Materie prime:
-{kpi["oro_pct"]:.1f}% / target 10%
-
-Liquidità / Overnight:
-{kpi["liquidita_pct"]:.1f}%
-
-━━━━━━━━━━━━━━━━━━
-
-📦 COMPOSIZIONE ATTUALE
-
-"""
-
-    for _, row in current_portfolio.iterrows():
-        report += f"• {row['asset']}: {format_money(row['current_value'])} ({row['weight']:.1f}%)\n"
-
-    report += """
-━━━━━━━━━━━━━━━━━━
-
-📒 OPERAZIONI STRAORDINARIE
-
-"""
-
-    if manual_transactions.empty:
-        report += "Nessuna operazione straordinaria registrata.\n"
-    else:
-        recent_transactions = manual_transactions.tail(10)
-
-        for _, tx in recent_transactions.iterrows():
-            report += (
-                f"• {tx['date']} — "
-                f"{tx['asset']} — "
-                f"{format_money(float(tx['amount']))} — "
-                f"{tx['source']}\n"
-            )
-
-    dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
-
-    report += """
-━━━━━━━━━━━━━━━━━━
-
-📌 CONCLUSIONI DEL MESE
-
-Osservazioni positive:
-"""
-
-    for item in dynamic["conclusions"]:
-        report += f"• {item}\n"
-
-    report += "\nElementi da monitorare:\n"
-
-    if dynamic["warnings"]:
-        for item in dynamic["warnings"]:
-            report += f"• {item}\n"
-    else:
-        report += "• Nessun elemento critico da monitorare.\n"
-
-    report += "\nAzione operativa:\n"
-
-    for item in dynamic["actions"]:
-        report += f"• {item}\n"
-
-    return report
-
 def generate_pac_message(pac_config):
     amounts = pac_config["monthly_amounts"]
     total = sum(float(v) for v in amounts.values())
