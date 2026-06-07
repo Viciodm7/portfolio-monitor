@@ -7,7 +7,7 @@
   },
   "buy_the_dip_rules": {
     "watch": {
-      "threshold": 0,
+      "threshold": -7,
       "message": "Ci stiamo avvicinando al primo livello Buy-The-Dip. Nessuna azione."
     },
     "attention": {
