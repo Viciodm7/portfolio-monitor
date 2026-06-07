@@ -566,6 +566,45 @@ Osservazioni positive:
 
     return report
 
+def calculate_dynamic_exposure(current_portfolio, exposure_model):
+    geography = {}
+    sectors = {}
+    companies = {}
+
+    asset_models = exposure_model["asset_models"]
+
+    for _, row in current_portfolio.iterrows():
+        asset = row["asset"]
+        portfolio_weight = float(row["weight"])
+
+        if asset not in asset_models:
+            continue
+
+        model = asset_models[asset]
+
+        for area, weight in model.get("geography", {}).items():
+            geography[area] = geography.get(area, 0.0) + portfolio_weight * weight / 100
+
+        for sector, weight in model.get("sectors", {}).items():
+            sectors[sector] = sectors.get(sector, 0.0) + portfolio_weight * weight / 100
+
+        for company, weight in model.get("companies", {}).items():
+            companies[company] = companies.get(company, 0.0) + portfolio_weight * weight / 100
+
+    magnificent_7 = exposure_model.get("magnificent_7", [])
+    magnificent_7_weight = sum(companies.get(company, 0.0) for company in magnificent_7)
+
+    geography = dict(sorted(geography.items(), key=lambda x: x[1], reverse=True))
+    sectors = dict(sorted(sectors.items(), key=lambda x: x[1], reverse=True))
+    companies = dict(sorted(companies.items(), key=lambda x: x[1], reverse=True))
+
+    return {
+        "geography": geography,
+        "sectors": sectors,
+        "dominant_companies": companies,
+        "magnificent_7_weight": magnificent_7_weight
+    }
+
 def generate_dynamic_conclusions(kpi, btd_status, pac_count):
     conclusions = []
     warnings = []
@@ -882,7 +921,7 @@ def build_context():
     state = load_json(STATE_FILE)
     pac_config = load_json(PAC_FILE)
     manual_transactions = load_manual_transactions()
-    exposure = load_json(EXPOSURE_FILE)
+    exposure_model = load_json(EXPOSURE_FILE)
     events = load_json(EVENTS_FILE)
 
     today = datetime.now().date()
@@ -902,6 +941,7 @@ def build_context():
         start_date
     )
 
+    exposure = calculate_dynamic_exposure(current_portfolio, exposure_model)
     kpi = calculate_kpi(current_portfolio, initial_total, pac_total, manual_total)
     drawdown = calculate_msci_world_drawdown()
 
