@@ -420,12 +420,12 @@ def generate_dynamic_conclusions(kpi, btd_status, pac_count):
     else:
         warnings.append(f"⚠️ Bond sopra target: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
 
-    if abs(kpi["oro_invested_pct"] - 10) <= 3:
+        if abs(kpi["oro_invested_pct"] - 10) <= 3:
         conclusions.append("✓ Materie prime in area coerente con il target.")
-    elif kpi["oro_invested_pct"]] < 7:
-        warnings.append(f"⚠️ Materie prime sotto soglia: {kpi['oro_pct']:.1f}% rispetto al target 10%.")
+    elif kpi["oro_invested_pct"] < 7:
+        warnings.append(f"⚠️ Materie prime sotto soglia: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%.")
     else:
-        warnings.append(f"⚠️ Materie prime sopra target: {kpi['oro_pct']:.1f}% rispetto al target 10%.")
+        warnings.append(f"⚠️ Materie prime sopra target: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%.")
 
     if kpi["performance_pct"] > 2:
         conclusions.append(f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}%.")
