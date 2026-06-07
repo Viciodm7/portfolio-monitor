@@ -619,7 +619,7 @@ Magnificent 7:
     else:
         report += "• Nessun alert operativo.\n"
 
-       report += """
+    report += """
 ━━━━━━━━━━━━━━━━━━
 
 📅 EVENTI CHIAVE
