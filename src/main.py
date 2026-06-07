@@ -549,7 +549,99 @@ In assenza di trigger operativi, la scelta corretta è mantenere la strategia in
 
     return report
 
-def generate_monthly_report(current_portfolio, kpi, pac_count, manual_transactions):
+def generate_dynamic_conclusions(kpi, btd_status, pac_count):
+    conclusions = []
+    warnings = []
+    actions = []
+
+    # Asset allocation
+    if abs(kpi["azionario_pct"] - 80) <= 5:
+        conclusions.append("✓ La componente azionaria è coerente con il target strategico.")
+    elif kpi["azionario_pct"] < 75:
+        warnings.append(
+            f"⚠️ Azionario sotto target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%."
+        )
+    else:
+        warnings.append(
+            f"⚠️ Azionario sopra target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%."
+        )
+
+    if abs(kpi["bond_pct"] - 10) <= 3:
+        conclusions.append("✓ La componente obbligazionaria è vicina al target.")
+    elif kpi["bond_pct"] < 7:
+        warnings.append(
+            f"⚠️ Bond sotto soglia: {kpi['bond_pct']:.1f}% rispetto al target 10%."
+        )
+    else:
+        warnings.append(
+            f"⚠️ Bond sopra target: {kpi['bond_pct']:.1f}% rispetto al target 10%."
+        )
+
+    if abs(kpi["oro_pct"] - 10) <= 3:
+        conclusions.append("✓ Materie prime in area coerente con il target.")
+    elif kpi["oro_pct"] < 7:
+        warnings.append(
+            f"⚠️ Materie prime sotto soglia: {kpi['oro_pct']:.1f}% rispetto al target 10%."
+        )
+    else:
+        warnings.append(
+            f"⚠️ Materie prime sopra target: {kpi['oro_pct']:.1f}% rispetto al target 10%."
+        )
+
+    # Performance
+    if kpi["performance_pct"] > 2:
+        conclusions.append(
+            f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}% da inizio monitoraggio."
+        )
+    elif kpi["performance_pct"] < -2:
+        warnings.append(
+            f"⚠️ Effetto mercato negativo: {kpi['performance_pct']:.2f}% da inizio monitoraggio."
+        )
+    else:
+        conclusions.append(
+            f"✓ Effetto mercato contenuto: {kpi['performance_pct']:.2f}% da inizio monitoraggio."
+        )
+
+    # PAC
+    if pac_count > 0:
+        conclusions.append(
+            f"✓ PAC regolare conteggiato: {pac_count} mensilità registrate."
+        )
+    else:
+        warnings.append("⚠️ Nessun PAC mensile ancora conteggiato.")
+
+    # Buy The Dip
+    if btd_status["is_action"]:
+        warnings.append(f"🚨 Trigger Buy-The-Dip {btd_status['label']} attivo.")
+        actions.append("Applicare l'azione operativa prevista dalla strategia Buy-The-Dip.")
+    elif btd_status["level"] in ["watch", "attention", "pre_trigger"]:
+        warnings.append(f"⚠️ Buy-The-Dip {btd_status['label']}: {btd_status['message']}")
+        actions.append("Prepararsi, ma non effettuare acquisti anticipati.")
+    else:
+        conclusions.append("✓ Nessun trigger Buy-The-Dip attivo.")
+        actions.append("Nessuna azione da compiere.")
+
+    # Liquidità
+    if kpi["liquidita_pct"] > 20:
+        warnings.append(
+            f"⚠️ Liquidità elevata: {kpi['liquidita_pct']:.1f}% del portafoglio."
+        )
+    elif kpi["liquidita_pct"] < 2:
+        warnings.append(
+            f"⚠️ Liquidità molto bassa: {kpi['liquidita_pct']:.1f}% del portafoglio."
+        )
+    else:
+        conclusions.append(
+            f"✓ Liquidità tattica disponibile: {kpi['liquidita_pct']:.1f}%."
+        )
+
+    return {
+        "conclusions": conclusions,
+        "warnings": warnings,
+        "actions": actions
+    }
+
+def generate_monthly_report(current_portfolio, kpi, pac_count, manual_transactions, btd_status):
     today = datetime.now().strftime("%d/%m/%Y")
 
     report = f"""📆 REPORT MENSILE PORTAFOGLIO
@@ -635,24 +727,31 @@ Liquidità / Overnight:
                 f"{tx['source']}\n"
             )
 
-        report += """
+           dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
+
+    report += """
 ━━━━━━━━━━━━━━━━━━
 
 📌 CONCLUSIONI DEL MESE
 
-✓ Il patrimonio continua a essere monitorato secondo la strategia definita.
-
-✓ L'analisi del mese non evidenzia condizioni che richiedano interventi straordinari.
-
-⚠️ Elementi da monitorare:
-• Scostamenti dall'asset allocation target
-• Evoluzione della liquidità disponibile
-• Eventuali trigger Buy-The-Dip
-
-Azione operativa:
-Nessuna azione da compiere.
-Continuare il PAC mensile previsto.
+Osservazioni positive:
 """
+
+    for item in dynamic["conclusions"]:
+        report += f"• {item}\n"
+
+    report += "\nElementi da monitorare:\n"
+
+    if dynamic["warnings"]:
+        for item in dynamic["warnings"]:
+            report += f"• {item}\n"
+    else:
+        report += "• Nessun elemento critico da monitorare.\n"
+
+    report += "\nAzione operativa:\n"
+
+    for item in dynamic["actions"]:
+        report += f"• {item}\n"
 
     return report
 
@@ -827,11 +926,12 @@ def main():
 
     elif args.mode == "monthly":
         report = generate_monthly_report(
-            context["portfolio"],
-            context["kpi"],
-            context["pac_count"],
-            context["manual_transactions"]
-        )
+    context["portfolio"],
+    context["kpi"],
+    context["pac_count"],
+    context["manual_transactions"],
+    context["btd_status"]
+)
 
         print(report)
         save_report(report)
