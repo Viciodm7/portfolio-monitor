@@ -525,7 +525,7 @@ Non registrata
 📌 CONCLUSIONE
 
 Strategia invariata se non è attivo un trigger operativo.
-Il sistema deve spesso concludere con “nessuna azione da compiere”.
+In assenza di trigger operativi, la scelta corretta è mantenere la strategia invariata.
 """
 
     return report
