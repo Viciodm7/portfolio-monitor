@@ -844,15 +844,29 @@ def send_telegram(message):
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    payload = {
-        "chat_id": chat_id,
-        "text": message[:3900]
-    }
+    max_length = 3500
+    chunks = [
+        message[i:i + max_length]
+        for i in range(0, len(message), max_length)
+    ]
 
-    response = requests.post(url, data=payload, timeout=20)
+    total_chunks = len(chunks)
 
-    if response.status_code != 200:
-        raise RuntimeError(f"Errore invio Telegram: {response.text}")
+    for index, chunk in enumerate(chunks, start=1):
+        header = ""
+
+        if total_chunks > 1:
+            header = f"Parte {index}/{total_chunks}\n\n"
+
+        payload = {
+            "chat_id": chat_id,
+            "text": header + chunk
+        }
+
+        response = requests.post(url, data=payload, timeout=20)
+
+        if response.status_code != 200:
+            raise RuntimeError(f"Errore invio Telegram: {response.text}")
 
 
 def save_report(report):
