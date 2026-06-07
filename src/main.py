@@ -437,7 +437,7 @@ Liquidità tattica stimata:
     for _, row in current_portfolio.iterrows():
         report += f"• {row['asset']}: {format_money(row['current_value'])} ({row['weight']:.1f}%)\n"
 
-    report += """
+        report += """
 ━━━━━━━━━━━━━━━━━━
 
 🌍 ESPOSIZIONE REALE
@@ -445,13 +445,13 @@ Liquidità tattica stimata:
 Geografia:
 """
 
-for area, value in exposure["geography"].items():
-        report += f"• {area}: {value}%\n"
+    for area, value in exposure["geography"].items():
+        report += f"• {area}: {value:.1f}%\n"
 
     report += "\nSettori:\n"
 
-for sector, value in exposure["sectors"].items():
-    report += f"• {sector}: {value:.1f}%\n"
+    for sector, value in exposure["sectors"].items():
+        report += f"• {sector}: {value:.1f}%\n"
 
     report += f"""
 Concentrazione Magnificent 7:
