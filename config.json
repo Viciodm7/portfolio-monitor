@@ -1,7 +1,7 @@
 {
   "target_allocation": {
-    "azionario": 75,
-    "obbligazionario": 15,
+    "azionario": 80,
+    "obbligazionario": 10,
     "oro": 10,
     "liquidita": 0
   },
