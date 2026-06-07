@@ -568,6 +568,9 @@ def build_context():
     state = load_json(STATE_FILE)
     pac_config = load_json(PAC_FILE)
     manual_transactions = load_manual_transactions()
+    
+    exposure = load_json(EXPOSURE_FILE)
+    events = load_json(EVENTS_FILE)
 
     today = datetime.now().date()
     start_date = state["portfolio_start_date"]
@@ -596,7 +599,7 @@ def build_context():
     actions = generate_actions(btd_status)
     health_score = calculate_health_score(kpi, btd_status)
 
-    return {
+        return {
         "portfolio": current_portfolio,
         "config": config,
         "pac_config": pac_config,
@@ -606,7 +609,9 @@ def build_context():
         "alerts": alerts,
         "actions": actions,
         "health_score": health_score,
-        "pac_count": pac_count
+        "pac_count": pac_count,
+        "exposure": exposure,
+        "events": events
     }
 
 
