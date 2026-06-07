@@ -627,7 +627,6 @@ def build_context():
     state = load_json(STATE_FILE)
     pac_config = load_json(PAC_FILE)
     manual_transactions = load_manual_transactions()
-    
     exposure = load_json(EXPOSURE_FILE)
     events = load_json(EVENTS_FILE)
 
@@ -658,7 +657,7 @@ def build_context():
     actions = generate_actions(btd_status)
     health_score = calculate_health_score(kpi, btd_status)
 
-        return {
+    return {
         "portfolio": current_portfolio,
         "config": config,
         "pac_config": pac_config,
