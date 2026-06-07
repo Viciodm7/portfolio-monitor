@@ -6,6 +6,18 @@
     "liquidita": 0
   },
   "buy_the_dip_rules": {
+    "watch": {
+      "threshold": -7,
+      "message": "Ci stiamo avvicinando al primo livello Buy-The-Dip. Nessuna azione."
+    },
+    "attention": {
+      "threshold": -10,
+      "message": "Drawdown significativo. Prepararsi mentalmente e verificare liquidità. Nessuna azione."
+    },
+    "pre_trigger": {
+      "threshold": -12.5,
+      "message": "Vicini al Trigger Livello 1. Preparare la liquidità ma non agire ancora."
+    },
     "level_1": {
       "threshold": -15,
       "liquidity_to_use": 25,
