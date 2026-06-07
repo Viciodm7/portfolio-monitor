@@ -727,7 +727,7 @@ Liquidità / Overnight:
                 f"{tx['source']}\n"
             )
 
-           dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
+    dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
 
     report += """
 ━━━━━━━━━━━━━━━━━━
