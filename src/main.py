@@ -635,16 +635,23 @@ Liquidità / Overnight:
                 f"{tx['source']}\n"
             )
 
-    report += """
+        report += """
 ━━━━━━━━━━━━━━━━━━
 
-📌 LETTURA DEL MESE
+📌 CONCLUSIONI DEL MESE
 
-Il report mensile separa i versamenti dalla performance di mercato.
-Questo serve a capire se la crescita del portafoglio deriva dal PAC, dagli extra o dal rendimento degli strumenti.
+✓ Il patrimonio continua a essere monitorato secondo la strategia definita.
 
-Azione:
-nessuna azione automatica. Le decisioni operative restano governate dal report settimanale e dai trigger Buy-The-Dip.
+✓ L'analisi del mese non evidenzia condizioni che richiedano interventi straordinari.
+
+⚠️ Elementi da monitorare:
+• Scostamenti dall'asset allocation target
+• Evoluzione della liquidità disponibile
+• Eventuali trigger Buy-The-Dip
+
+Azione operativa:
+Nessuna azione da compiere.
+Continuare il PAC mensile previsto.
 """
 
     return report
