@@ -356,7 +356,7 @@ def format_money(value):
     return f"{value:,.0f} €".replace(",", ".")
 
 
-def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, btd_status, health_score, pac_count, exposure, events):
+def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, btd_status, health_score, pac_count, exposure, events, manual_transactions):
     today = datetime.now().strftime("%d/%m/%Y")
     drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
 
@@ -509,6 +509,25 @@ Azione prevista:
     else:
         report += "• Nessun alert operativo.\n"
 
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📒 OPERAZIONI STRAORDINARIE
+
+"""
+
+    if manual_transactions.empty:
+        report += "Nessuna operazione straordinaria registrata.\n"
+    else:
+        recent_transactions = manual_transactions.tail(5)
+
+        for _, tx in recent_transactions.iterrows():
+            report += (
+                f"• {tx['date']} — "
+                f"{tx['asset']} — "
+                f"{format_money(float(tx['amount']))} — "
+                f"{tx['source']}\n"
+            )
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
@@ -669,7 +688,8 @@ def build_context():
         "health_score": health_score,
         "pac_count": pac_count,
         "exposure": exposure,
-        "events": events
+        "events": events,
+        "manual_transactions": manual_transactions
     }
 
 
@@ -691,7 +711,8 @@ def main():
     context["health_score"],
     context["pac_count"],
     context["exposure"],
-    context["events"]
+    context["events"],
+    context["manual_transactions"]
 )
 
         print(report)
