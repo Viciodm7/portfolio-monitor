@@ -541,11 +541,28 @@ Non registrata
 
 ━━━━━━━━━━━━━━━━━━
 
-📌 CONCLUSIONE
+📌 CONCLUSIONI SETTIMANALI
 
-Strategia invariata se non è attivo un trigger operativo.
-In assenza di trigger operativi, la scelta corretta è mantenere la strategia invariata.
+Osservazioni positive:
 """
+
+    dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
+
+    for item in dynamic["conclusions"]:
+        report += f"• {item}\n"
+
+    report += "\nElementi da monitorare:\n"
+
+    if dynamic["warnings"]:
+        for item in dynamic["warnings"]:
+            report += f"• {item}\n"
+    else:
+        report += "• Nessun elemento critico da monitorare.\n"
+
+    report += "\nAzione operativa:\n"
+
+    for item in dynamic["actions"]:
+        report += f"• {item}\n"
 
     return report
 
