@@ -613,12 +613,17 @@ Performance:
 
 ━━━━━━━━━━━━━━━━━━
 
-⚖️ ALLOCAZIONE
+⚖️ ALLOCAZIONE STRATEGICA
 
-Azionario: {kpi["azionario_pct"]:.1f}% / target 80%
-Bond: {kpi["bond_pct"]:.1f}% / target 10%
-Materie prime: {kpi["oro_pct"]:.1f}% / target 10%
-Liquidità: {kpi["liquidita_pct"]:.1f}%
+Capitale investito:
+{format_money(kpi["invested_total"])}
+
+Azionario: {kpi["azionario_invested_pct"]:.1f}% / target 80%
+Bond: {kpi["bond_invested_pct"]:.1f}% / target 10%
+Materie prime: {kpi["oro_invested_pct"]:.1f}% / target 10%
+
+Liquidità tattica:
+{format_money(kpi["liquidita_value"])} ({kpi["liquidita_pct"]:.1f}% del patrimonio totale)
 
 ━━━━━━━━━━━━━━━━━━
 
