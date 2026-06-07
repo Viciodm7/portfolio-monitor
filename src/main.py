@@ -619,7 +619,7 @@ Magnificent 7:
     else:
         report += "• Nessun alert operativo.\n"
 
-    report += """
+       report += """
 ━━━━━━━━━━━━━━━━━━
 
 📅 EVENTI CHIAVE
@@ -627,8 +627,10 @@ Magnificent 7:
 
     for event in events[:4]:
         report += f"""
-▶ {event["event"]}
-• Impatto: {event["potential_impact"][0]}
+▶ {event["event"]} — {event["category"]} — Rilevanza {event["relevance"]}
+• Perché conta: {event["why_it_matters"]}
+• Scenario positivo: {event["positive_impact"]}
+• Scenario negativo: {event["negative_impact"]}
 • Azione: {event["action"]}
 """
 
