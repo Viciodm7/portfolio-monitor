@@ -1,0 +1,37 @@
+name: Monthly Portfolio Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 18 1 * *"
+      timezone: "Europe/Rome"
+
+jobs:
+  monthly-report:
+    runs-on: ubuntu-latest
+
+    env:
+      SEND_TELEGRAM: "true"
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monthly portfolio report
+        run: python src/main.py --mode monthly
+
+      - name: Upload monthly report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-portfolio-report
+          path: reports/latest_report.md
