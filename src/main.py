@@ -355,6 +355,182 @@ def calculate_health_score(kpi, btd_status):
 def format_money(value):
     return f"{value:,.0f} €".replace(",", ".")
 
+def calculate_dynamic_exposure(current_portfolio, exposure_model):
+    geography = {}
+    sectors = {}
+    companies = {}
+
+    asset_models = exposure_model["asset_models"]
+
+    for _, row in current_portfolio.iterrows():
+        asset = row["asset"]
+        portfolio_weight = float(row["weight"])
+
+        if asset not in asset_models:
+            continue
+
+        model = asset_models[asset]
+
+        for area, weight in model.get("geography", {}).items():
+            geography[area] = geography.get(area, 0.0) + portfolio_weight * weight / 100
+
+        for sector, weight in model.get("sectors", {}).items():
+            sectors[sector] = sectors.get(sector, 0.0) + portfolio_weight * weight / 100
+
+        for company, weight in model.get("companies", {}).items():
+            companies[company] = companies.get(company, 0.0) + portfolio_weight * weight / 100
+
+    magnificent_7 = exposure_model.get("magnificent_7", [])
+    magnificent_7_weight = sum(companies.get(company, 0.0) for company in magnificent_7)
+
+    return {
+        "geography": dict(sorted(geography.items(), key=lambda x: x[1], reverse=True)),
+        "sectors": dict(sorted(sectors.items(), key=lambda x: x[1], reverse=True)),
+        "dominant_companies": dict(sorted(companies.items(), key=lambda x: x[1], reverse=True)),
+        "magnificent_7_weight": magnificent_7_weight
+    }
+
+
+def generate_dynamic_conclusions(kpi, btd_status, pac_count):
+    conclusions = []
+    warnings = []
+    actions = []
+
+    if abs(kpi["azionario_pct"] - 80) <= 5:
+        conclusions.append("✓ La componente azionaria è coerente con il target strategico.")
+    elif kpi["azionario_pct"] < 75:
+        warnings.append(f"⚠️ Azionario sotto target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%.")
+    else:
+        warnings.append(f"⚠️ Azionario sopra target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%.")
+
+    if abs(kpi["bond_pct"] - 10) <= 3:
+        conclusions.append("✓ La componente obbligazionaria è vicina al target.")
+    elif kpi["bond_pct"] < 7:
+        warnings.append(f"⚠️ Bond sotto soglia: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
+    else:
+        warnings.append(f"⚠️ Bond sopra target: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
+
+    if abs(kpi["oro_pct"] - 10) <= 3:
+        conclusions.append("✓ Materie prime in area coerente con il target.")
+    elif kpi["oro_pct"] < 7:
+        warnings.append(f"⚠️ Materie prime sotto soglia: {kpi['oro_pct']:.1f}% rispetto al target 10%.")
+    else:
+        warnings.append(f"⚠️ Materie prime sopra target: {kpi['oro_pct']:.1f}% rispetto al target 10%.")
+
+    if kpi["performance_pct"] > 2:
+        conclusions.append(f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}%.")
+    elif kpi["performance_pct"] < -2:
+        warnings.append(f"⚠️ Effetto mercato negativo: {kpi['performance_pct']:.2f}%.")
+    else:
+        conclusions.append(f"✓ Effetto mercato contenuto: {kpi['performance_pct']:.2f}%.")
+
+    if pac_count > 0:
+        conclusions.append(f"✓ PAC regolare conteggiato: {pac_count} mensilità.")
+    else:
+        warnings.append("⚠️ Nessun PAC mensile ancora conteggiato.")
+
+    if btd_status["is_action"]:
+        warnings.append(f"🚨 Trigger Buy-The-Dip {btd_status['label']} attivo.")
+        actions.append("Applicare l'azione operativa prevista dalla strategia Buy-The-Dip.")
+    elif btd_status["level"] in ["watch", "attention", "pre_trigger"]:
+        warnings.append(f"⚠️ Buy-The-Dip {btd_status['label']}: {btd_status['message']}")
+        actions.append("Prepararsi, ma non effettuare acquisti anticipati.")
+    else:
+        conclusions.append("✓ Nessun trigger Buy-The-Dip attivo.")
+        actions.append("Nessuna azione da compiere.")
+
+    return {
+        "conclusions": conclusions,
+        "warnings": warnings,
+        "actions": actions
+    }
+
+
+def generate_monthly_report(current_portfolio, kpi, pac_count, manual_transactions, btd_status):
+    today = datetime.now().strftime("%d/%m/%Y")
+    dynamic = generate_dynamic_conclusions(kpi, btd_status, pac_count)
+
+    report = f"""📆 REPORT MENSILE PORTAFOGLIO
+📅 {today}
+
+━━━━━━━━━━━━━━━━━━
+
+💰 PATRIMONIO
+
+Valore attuale:
+{format_money(kpi["total"])}
+
+Capitale iniziale:
+{format_money(kpi["initial_total"])}
+
+PAC accumulati:
+{format_money(kpi["pac_total"])}
+
+Extra manuali:
+{format_money(kpi["manual_total"])}
+
+Effetto mercato:
+{format_money(kpi["market_effect"])}
+
+Performance:
+{kpi["performance_pct"]:.2f}%
+
+━━━━━━━━━━━━━━━━━━
+
+⚖️ ASSET ALLOCATION
+
+Azionario: {kpi["azionario_pct"]:.1f}% / target 80%
+Bond: {kpi["bond_pct"]:.1f}% / target 10%
+Materie prime: {kpi["oro_pct"]:.1f}% / target 10%
+Liquidità: {kpi["liquidita_pct"]:.1f}%
+
+━━━━━━━━━━━━━━━━━━
+
+📦 COMPOSIZIONE
+
+"""
+
+    for _, row in current_portfolio.iterrows():
+        report += f"• {row['asset']}: {format_money(row['current_value'])} ({row['weight']:.1f}%)\n"
+
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📒 OPERAZIONI STRAORDINARIE
+
+"""
+
+    if manual_transactions.empty:
+        report += "Nessuna operazione straordinaria registrata.\n"
+    else:
+        for _, tx in manual_transactions.tail(10).iterrows():
+            report += f"• {tx['date']} — {tx['asset']} — {format_money(float(tx['amount']))} — {tx['source']}\n"
+
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📌 CONCLUSIONI DEL MESE
+
+Osservazioni positive:
+"""
+
+    for item in dynamic["conclusions"]:
+        report += f"• {item}\n"
+
+    report += "\nElementi da monitorare:\n"
+
+    if dynamic["warnings"]:
+        for item in dynamic["warnings"]:
+            report += f"• {item}\n"
+    else:
+        report += "• Nessun elemento critico da monitorare.\n"
+
+    report += "\nAzione operativa:\n"
+
+    for item in dynamic["actions"]:
+        report += f"• {item}\n"
+
+    return report
 
 def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, btd_status, health_score, pac_count, exposure, events, manual_transactions):
     today = datetime.now().strftime("%d/%m/%Y")
