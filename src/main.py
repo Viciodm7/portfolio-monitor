@@ -419,30 +419,48 @@ def generate_dynamic_conclusions(kpi, btd_status, pac_count):
     if abs(kpi["azionario_invested_pct"] - 80) <= 5:
         conclusions.append("✓ La componente azionaria è coerente con il target strategico.")
     elif kpi["azionario_invested_pct"] < 75:
-        warnings.append(f"⚠️ Azionario sotto target: {kpi['azionario_invested_pct']:.1f}% rispetto all'obiettivo 80%.")
+        warnings.append(
+            f"⚠️ Azionario sotto target: {kpi['azionario_invested_pct']:.1f}% rispetto all'obiettivo 80%."
+        )
     else:
-        warnings.append(f"⚠️ Azionario sopra target: {kpi['azionario_pct']:.1f}% rispetto all'obiettivo 80%.")
+        warnings.append(
+            f"⚠️ Azionario sopra target: {kpi['azionario_invested_pct']:.1f}% rispetto all'obiettivo 80%."
+        )
 
     if abs(kpi["bond_invested_pct"] - 10) <= 3:
         conclusions.append("✓ La componente obbligazionaria è vicina al target.")
     elif kpi["bond_invested_pct"] < 7:
-        warnings.append(f"⚠️ Bond sotto soglia: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
+        warnings.append(
+            f"⚠️ Bond sotto soglia: {kpi['bond_invested_pct']:.1f}% rispetto al target 10%."
+        )
     else:
-        warnings.append(f"⚠️ Bond sopra target: {kpi['bond_pct']:.1f}% rispetto al target 10%.")
+        warnings.append(
+            f"⚠️ Bond sopra target: {kpi['bond_invested_pct']:.1f}% rispetto al target 10%."
+        )
 
-        if abs(kpi["oro_invested_pct"] - 10) <= 3:
+    if abs(kpi["oro_invested_pct"] - 10) <= 3:
         conclusions.append("✓ Materie prime in area coerente con il target.")
     elif kpi["oro_invested_pct"] < 7:
-        warnings.append(f"⚠️ Materie prime sotto soglia: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%.")
+        warnings.append(
+            f"⚠️ Materie prime sotto soglia: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%."
+        )
     else:
-        warnings.append(f"⚠️ Materie prime sopra target: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%.")
+        warnings.append(
+            f"⚠️ Materie prime sopra target: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%."
+        )
 
     if kpi["performance_pct"] > 2:
-        conclusions.append(f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}%.")
+        conclusions.append(
+            f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}%."
+        )
     elif kpi["performance_pct"] < -2:
-        warnings.append(f"⚠️ Effetto mercato negativo: {kpi['performance_pct']:.2f}%.")
+        warnings.append(
+            f"⚠️ Effetto mercato negativo: {kpi['performance_pct']:.2f}%."
+        )
     else:
-        conclusions.append(f"✓ Effetto mercato contenuto: {kpi['performance_pct']:.2f}%.")
+        conclusions.append(
+            f"✓ Effetto mercato contenuto: {kpi['performance_pct']:.2f}%."
+        )
 
     if pac_count > 0:
         conclusions.append(f"✓ PAC regolare conteggiato: {pac_count} mensilità.")
