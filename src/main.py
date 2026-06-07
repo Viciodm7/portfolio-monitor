@@ -445,12 +445,12 @@ Liquidità tattica stimata:
 Geografia:
 """
 
-    for area, value in exposure["geography"].items():
+for area, value in exposure["geography"].items():
         report += f"• {area}: {value}%\n"
 
     report += "\nSettori:\n"
 
-    for sector, value in exposure["sectors"].items():
+for sector, value in exposure["sectors"].items():
     report += f"• {sector}: {value:.1f}%\n"
 
     report += f"""
