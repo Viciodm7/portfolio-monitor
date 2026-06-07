@@ -451,7 +451,7 @@ Geografia:
     report += "\nSettori:\n"
 
     for sector, value in exposure["sectors"].items():
-        report += f"• {sector}: {value}%\n"
+    report += f"• {sector}: {value:.1f}%\n"
 
     report += f"""
 Concentrazione Magnificent 7:
