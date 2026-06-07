@@ -326,19 +326,29 @@ def generate_alerts(kpi, btd_status):
     alerts = []
 
     if abs(kpi["azionario_invested_pct"] - 80) > 5:
-    alerts.append(f"Azionario distante dal target 80% sul capitale investito: attuale {kpi['azionario_invested_pct']:.1f}%.")
+        alerts.append(
+            f"Azionario distante dal target 80% sul capitale investito: attuale {kpi['azionario_invested_pct']:.1f}%."
+        )
 
     if kpi["bond_invested_pct"] < 7:
-    alerts.append(f"Bond sotto soglia sul capitale investito: attuale {kpi['bond_invested_pct']:.1f}%.")
+        alerts.append(
+            f"Bond sotto soglia sul capitale investito: attuale {kpi['bond_invested_pct']:.1f}%."
+        )
 
-    if kpi["oro_pct"] < 8:
-        alerts.append(f"Oro sotto soglia informativa: attuale {kpi['oro_pct']:.1f}%.")
+    if kpi["oro_invested_pct"] < 7:
+        alerts.append(
+            f"Materie prime sotto soglia sul capitale investito: attuale {kpi['oro_invested_pct']:.1f}%."
+        )
 
     if btd_status["level"] in ["watch", "attention", "pre_trigger"]:
-        alerts.append(f"Buy-The-Dip {btd_status['label']}: {btd_status['message']}")
+        alerts.append(
+            f"Buy-The-Dip {btd_status['label']}: {btd_status['message']}"
+        )
 
     if btd_status["is_action"]:
-        alerts.append(f"Trigger Buy-The-Dip {btd_status['label']} attivo.")
+        alerts.append(
+            f"Trigger Buy-The-Dip {btd_status['label']} attivo."
+        )
 
     return alerts
 
