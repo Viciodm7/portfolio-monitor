@@ -13,6 +13,8 @@ CONFIG_FILE = "config.json"
 STATE_FILE = "data/portfolio_state.json"
 PAC_FILE = "data/pac_config.json"
 MANUAL_TRANSACTIONS_FILE = "data/manual_transactions.csv"
+EXPOSURE_FILE = "data/portfolio_exposure.json"
+EVENTS_FILE = "data/events_watchlist.json"
 
 
 def load_json(file_path):
