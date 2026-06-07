@@ -549,6 +549,105 @@ In assenza di trigger operativi, la scelta corretta è mantenere la strategia in
 
     return report
 
+def generate_monthly_report(current_portfolio, kpi, pac_count, manual_transactions):
+    today = datetime.now().strftime("%d/%m/%Y")
+
+    report = f"""📆 REPORT MENSILE PORTAFOGLIO
+📅 {today}
+
+━━━━━━━━━━━━━━━━━━
+
+💰 PATRIMONIO
+
+Valore attuale:
+{format_money(kpi["total"])}
+
+Capitale iniziale:
+{format_money(kpi["initial_total"])}
+
+PAC accumulati:
+{format_money(kpi["pac_total"])}
+
+Extra manuali:
+{format_money(kpi["manual_total"])}
+
+Effetto mercato:
+{format_money(kpi["market_effect"])}
+
+Performance da inizio monitoraggio:
+{kpi["performance_pct"]:.2f}%
+
+━━━━━━━━━━━━━━━━━━
+
+💶 PAC
+
+PAC mensili conteggiati:
+{pac_count}
+
+PAC totale versato:
+{format_money(kpi["pac_total"])}
+
+Media mensile PAC:
+{format_money(kpi["pac_total"] / pac_count if pac_count else 0)}
+
+━━━━━━━━━━━━━━━━━━
+
+⚖️ ASSET ALLOCATION
+
+Azionario:
+{kpi["azionario_pct"]:.1f}% / target 80%
+
+Bond:
+{kpi["bond_pct"]:.1f}% / target 10%
+
+Materie prime:
+{kpi["oro_pct"]:.1f}% / target 10%
+
+Liquidità / Overnight:
+{kpi["liquidita_pct"]:.1f}%
+
+━━━━━━━━━━━━━━━━━━
+
+📦 COMPOSIZIONE ATTUALE
+
+"""
+
+    for _, row in current_portfolio.iterrows():
+        report += f"• {row['asset']}: {format_money(row['current_value'])} ({row['weight']:.1f}%)\n"
+
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📒 OPERAZIONI STRAORDINARIE
+
+"""
+
+    if manual_transactions.empty:
+        report += "Nessuna operazione straordinaria registrata.\n"
+    else:
+        recent_transactions = manual_transactions.tail(10)
+
+        for _, tx in recent_transactions.iterrows():
+            report += (
+                f"• {tx['date']} — "
+                f"{tx['asset']} — "
+                f"{format_money(float(tx['amount']))} — "
+                f"{tx['source']}\n"
+            )
+
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📌 LETTURA DEL MESE
+
+Il report mensile separa i versamenti dalla performance di mercato.
+Questo serve a capire se la crescita del portafoglio deriva dal PAC, dagli extra o dal rendimento degli strumenti.
+
+Azione:
+nessuna azione automatica. Le decisioni operative restano governate dal report settimanale e dai trigger Buy-The-Dip.
+"""
+
+    return report
 
 def generate_pac_message(pac_config):
     amounts = pac_config["monthly_amounts"]
@@ -695,7 +794,7 @@ def build_context():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["weekly", "daily"], default="weekly")
+    parser.add_argument("--mode", choices=["weekly", "daily", "monthly"], default="weekly")
     args = parser.parse_args()
 
     context = build_context()
@@ -719,6 +818,18 @@ def main():
         save_report(report)
         send_telegram(report)
 
+    elif args.mode == "monthly":
+        report = generate_monthly_report(
+            context["portfolio"],
+            context["kpi"],
+            context["pac_count"],
+            context["manual_transactions"]
+        )
+
+        print(report)
+        save_report(report)
+        send_telegram(report)
+    
     elif args.mode == "daily":
         today = datetime.now().date()
         pac_config = context["pac_config"]
