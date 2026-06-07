@@ -356,7 +356,7 @@ def format_money(value):
     return f"{value:,.0f} €".replace(",", ".")
 
 
-def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, btd_status, health_score, pac_count):
+def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, btd_status, health_score, pac_count, exposure, events):
     today = datetime.now().strftime("%d/%m/%Y")
     drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
 
@@ -437,6 +437,65 @@ Liquidità tattica stimata:
     for _, row in current_portfolio.iterrows():
         report += f"• {row['asset']}: {format_money(row['current_value'])} ({row['weight']:.1f}%)\n"
 
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+🌍 ESPOSIZIONE REALE
+
+Geografia:
+"""
+
+    for area, value in exposure["geography"].items():
+        report += f"• {area}: {value}%\n"
+
+    report += "\nSettori:\n"
+
+    for sector, value in exposure["sectors"].items():
+        report += f"• {sector}: {value}%\n"
+
+    report += f"""
+Concentrazione Magnificent 7:
+{exposure["magnificent_7_weight"]:.1f}%
+
+━━━━━━━━━━━━━━━━━━
+
+🏢 AZIENDE CHE MUOVONO IL PORTAFOGLIO
+
+"""
+
+    for company, value in exposure["dominant_companies"].items():
+        report += f"• {company}: {value:.1f}%\n"
+
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📅 EVENTI DA MONITORARE
+
+"""
+
+    for event in events:
+        report += f"""▶ {event["event"]}
+Quando: {event["date"]}
+
+Perché conta:
+{event["why_it_matters"]}
+
+Cosa monitorare:
+"""
+        for item in event["what_to_monitor"]:
+            report += f"• {item}\n"
+
+        report += "\nPossibile impatto:\n"
+
+        for item in event["potential_impact"]:
+            report += f"• {item}\n"
+
+        report += f"""
+Azione prevista:
+{event["action"]}
+
+---
+"""
     report += f"""
 ━━━━━━━━━━━━━━━━━━
 
@@ -624,15 +683,17 @@ def main():
 
     if args.mode == "weekly":
         report = generate_weekly_report(
-            context["portfolio"],
-            context["kpi"],
-            context["alerts"],
-            context["actions"],
-            context["drawdown"],
-            context["btd_status"],
-            context["health_score"],
-            context["pac_count"]
-        )
+    context["portfolio"],
+    context["kpi"],
+    context["alerts"],
+    context["actions"],
+    context["drawdown"],
+    context["btd_status"],
+    context["health_score"],
+    context["pac_count"],
+    context["exposure"],
+    context["events"]
+)
 
         print(report)
         save_report(report)
