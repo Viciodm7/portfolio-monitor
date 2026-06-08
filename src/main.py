@@ -936,26 +936,26 @@ def main():
 
     context = build_context()
 
-    if args.mode == "weekly":
+      if args.mode == "weekly":
         report = generate_weekly_report(
-    context["portfolio"],
-    context["kpi"],
-    context["alerts"],
-    context["actions"],
-    context["drawdown"],
-    context["btd_status"],
-    context["health_score"],
-    context["pac_count"],
-    context["exposure"],
-    context["events"],
-    context["manual_transactions"]
-)
+            context["portfolio"],
+            context["kpi"],
+            context["alerts"],
+            context["actions"],
+            context["drawdown"],
+            context["btd_status"],
+            context["health_score"],
+            context["pac_count"],
+            context["exposure"],
+            context["events"],
+            context["manual_transactions"]
+        )
 
         print(report)
         save_report(report)
         send_telegram(report)
 
-        elif args.mode == "market":
+    elif args.mode == "market":
         report = generate_market_radar(
             context["events"],
             context["kpi"],
@@ -966,20 +966,20 @@ def main():
         print(report)
         save_report(report)
         send_telegram(report)
-    
+
     elif args.mode == "monthly":
         report = generate_monthly_report(
-    context["portfolio"],
-    context["kpi"],
-    context["pac_count"],
-    context["manual_transactions"],
-    context["btd_status"]
-)
+            context["portfolio"],
+            context["kpi"],
+            context["pac_count"],
+            context["manual_transactions"],
+            context["btd_status"]
+        )
 
         print(report)
         save_report(report)
         send_telegram(report)
-    
+
     elif args.mode == "daily":
         today = datetime.now().date()
         pac_config = context["pac_config"]
@@ -1004,7 +1004,3 @@ def main():
             send_telegram(final_message)
         else:
             print("Nessun evento giornaliero da notificare.")
-
-
-if __name__ == "__main__":
-    main()
