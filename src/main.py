@@ -999,7 +999,7 @@ def send_telegram(message):
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-        max_length = 3500
+    max_length = 3500
     sections = message.split("━━━━━━━━━━━━━━━━━━")
     chunks = []
     current_chunk = ""
@@ -1010,13 +1010,10 @@ def send_telegram(message):
         if not section_text:
             continue
 
-        candidate = (
-            current_chunk
-            + "\n\n━━━━━━━━━━━━━━━━━━\n\n"
-            + section_text
-            if current_chunk
-            else section_text
-        )
+        if current_chunk:
+            candidate = current_chunk + "\n\n━━━━━━━━━━━━━━━━━━\n\n" + section_text
+        else:
+            candidate = section_text
 
         if len(candidate) <= max_length:
             current_chunk = candidate
