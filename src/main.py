@@ -702,14 +702,85 @@ Osservazioni positive:
 
     return report
 
+def get_fed_events(today_date):
+    fed_meetings = [
+        {
+            "event": "FED - Riunione FOMC",
+            "date": "2026-06-17",
+            "category": "Macro USA",
+            "impact": "ALTO",
+            "description": "La Federal Reserve comunicherà la decisione sui tassi e aggiornerà le proiezioni economiche.",
+            "why_it_matters": "I tassi USA influenzano MSCI World, tecnologia, dollaro, Tesla e Magnificent 7.",
+            "positive_scenario": "Tono accomodante o apertura a futuri tagli: possibile supporto a growth, tecnologia e MSCI World.",
+            "negative_scenario": "Tono restrittivo: possibile pressione su Nasdaq, Tesla e Magnificent 7.",
+            "sensitive_assets": ["MSCI World", "Tesla", "Tecnologia USA", "Magnificent 7"],
+            "action": "Nessuna azione preventiva. Agire solo se il Portfolio Radar attiva un trigger Buy-The-Dip."
+        },
+        {
+            "event": "FED - Riunione FOMC",
+            "date": "2026-07-29",
+            "category": "Macro USA",
+            "impact": "ALTO",
+            "description": "La Federal Reserve comunicherà la decisione sui tassi di interesse.",
+            "why_it_matters": "La traiettoria dei tassi condiziona valutazioni azionarie, dollaro e settore growth.",
+            "positive_scenario": "Messaggio più accomodante del previsto: possibile supporto a MSCI World e tecnologia.",
+            "negative_scenario": "Messaggio più restrittivo del previsto: possibile pressione su Nasdaq e asset growth.",
+            "sensitive_assets": ["MSCI World", "Tecnologia USA", "EUR/USD", "Magnificent 7"],
+            "action": "Nessuna azione preventiva. Monitorare solo l'impatto sul drawdown complessivo."
+        },
+        {
+            "event": "FED - Riunione FOMC con proiezioni economiche",
+            "date": "2026-09-16",
+            "category": "Macro USA",
+            "impact": "ALTO",
+            "description": "La Federal Reserve comunicherà la decisione sui tassi e aggiornerà il Summary of Economic Projections.",
+            "why_it_matters": "Le proiezioni FED influenzano aspettative sui tassi, dollaro, tecnologia e obbligazionario.",
+            "positive_scenario": "Proiezioni più accomodanti: supporto a growth, bond e MSCI World.",
+            "negative_scenario": "Proiezioni più restrittive: pressione su tecnologia, bond e mercato globale.",
+            "sensitive_assets": ["MSCI World", "Bond Globali", "Tecnologia USA", "EUR/USD"],
+            "action": "Nessuna azione preventiva. Eventuali acquisti restano vincolati ai trigger Buy-The-Dip."
+        },
+        {
+            "event": "FED - Riunione FOMC",
+            "date": "2026-10-28",
+            "category": "Macro USA",
+            "impact": "ALTO",
+            "description": "La Federal Reserve comunicherà la decisione sui tassi.",
+            "why_it_matters": "L'orientamento della FED può modificare aspettative di mercato su crescita, dollaro e tecnologia.",
+            "positive_scenario": "Tono accomodante: possibile supporto agli asset rischiosi.",
+            "negative_scenario": "Tono restrittivo: possibile volatilità su tecnologia e MSCI World.",
+            "sensitive_assets": ["MSCI World", "Tecnologia USA", "Magnificent 7"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "FED - Riunione FOMC con proiezioni economiche",
+            "date": "2026-12-09",
+            "category": "Macro USA",
+            "impact": "ALTO",
+            "description": "La Federal Reserve comunicherà la decisione sui tassi e aggiornerà le proiezioni economiche.",
+            "why_it_matters": "Evento rilevante per impostazione di mercato su anno successivo, tassi, dollaro e azionario globale.",
+            "positive_scenario": "Proiezioni più favorevoli: supporto a MSCI World, tecnologia e bond.",
+            "negative_scenario": "Proiezioni restrittive: possibile pressione su growth e obbligazionario.",
+            "sensitive_assets": ["MSCI World", "Bond Globali", "Tecnologia USA", "EUR/USD"],
+            "action": "Nessuna azione preventiva. Usare liquidità tattica solo con trigger."
+        }
+    ]
+
+    return fed_meetings
+
 def generate_market_radar(market_events, kpi, drawdown, exposure):
     today_date = datetime.now().date()
     today = datetime.now().strftime("%d/%m/%Y")
     drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
 
+    automatic_events = []
+    automatic_events.extend(get_fed_events(today_date))
+
+    all_events = market_events + automatic_events
+    
     upcoming_events = []
 
-    for event in market_events:
+    for event in all_events:
         event_date = datetime.strptime(event["date"], "%Y-%m-%d").date()
         days_left = (event_date - today_date).days
 
