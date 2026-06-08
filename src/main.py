@@ -931,12 +931,16 @@ def build_context():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["weekly", "daily", "monthly", "market"], default="weekly")
+    parser.add_argument(
+        "--mode",
+        choices=["weekly", "daily", "monthly", "market"],
+        default="weekly"
+    )
     args = parser.parse_args()
 
     context = build_context()
 
-      if args.mode == "weekly":
+    if args.mode == "weekly":
         report = generate_weekly_report(
             context["portfolio"],
             context["kpi"],
@@ -1004,3 +1008,7 @@ def main():
             send_telegram(final_message)
         else:
             print("Nessun evento giornaliero da notificare.")
+
+
+if __name__ == "__main__":
+    main()
