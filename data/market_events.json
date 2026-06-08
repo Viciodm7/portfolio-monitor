@@ -1,29 +1,5 @@
 [
   {
-    "event": "BCE - Riunione politica monetaria",
-    "date": "2026-06-11",
-    "category": "Macro Europa",
-    "impact": "MEDIO",
-    "description": "La BCE comunicherà la decisione di politica monetaria e aggiornerà il messaggio sui tassi.",
-    "why_it_matters": "Impatta euro, bond e condizioni finanziarie europee.",
-    "positive_scenario": "Toni accomodanti: possibile supporto ai bond.",
-    "negative_scenario": "Toni restrittivi: possibile pressione sull'obbligazionario.",
-    "sensitive_assets": ["Bond Globali", "EUR/USD", "Azionario Europa"],
-    "action": "Nessuna azione operativa."
-  },
-  {
-    "event": "Inflazione USA - CPI",
-    "date": "2026-06-12",
-    "category": "Macro USA",
-    "impact": "ALTO",
-    "description": "Pubblicazione dell'indice dei prezzi al consumo USA e della componente core.",
-    "why_it_matters": "Il CPI influenza le aspettative sui tassi FED e le valutazioni dei titoli growth.",
-    "positive_scenario": "Dato sotto le attese: possibile supporto a tecnologia, MSCI World e bond.",
-    "negative_scenario": "Dato sopra le attese: possibile pressione su Nasdaq, tecnologia e obbligazionario.",
-    "sensitive_assets": ["MSCI World", "Bond Globali", "Tecnologia USA", "EUR/USD"],
-    "action": "Monitorare. Nessun acquisto anticipato."
-  },
-  {
     "event": "Nvidia - Trimestrale",
     "date": "2026-08-28",
     "category": "Big Tech / AI",
