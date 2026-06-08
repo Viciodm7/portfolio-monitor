@@ -1,3 +1,5 @@
+from openai import OpenAI
+
 import argparse
 import json
 import os
