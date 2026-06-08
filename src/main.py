@@ -613,6 +613,19 @@ Performance:
 
 ━━━━━━━━━━━━━━━━━━
 
+📦 COMPOSIZIONE PORTAFOGLIO
+
+"""
+    for _, row in current_portfolio.iterrows():
+        report += (
+            f"• {row['asset']}: "
+            f"{format_money(row['current_value'])} "
+            f"({row['weight']:.1f}%)\n"
+        )
+
+    report += f"""
+━━━━━━━━━━━━━━━━━━
+
 ⚖️ ALLOCAZIONE STRATEGICA
 
 Capitale investito:
@@ -661,21 +674,6 @@ Magnificent 7:
             report += f"• {alert}\n"
     else:
         report += "• Nessun alert operativo.\n"
-
-    report += """
-━━━━━━━━━━━━━━━━━━
-
-📅 EVENTI CHIAVE
-"""
-
-    for event in events[:4]:
-        report += f"""
-▶ {event["event"]} — {event["category"]} — Rilevanza {event["relevance"]}
-• Perché conta: {event["why_it_matters"]}
-• Scenario positivo: {event["positive_impact"]}
-• Scenario negativo: {event["negative_impact"]}
-• Azione: {event["action"]}
-"""
 
     report += """
 ━━━━━━━━━━━━━━━━━━
