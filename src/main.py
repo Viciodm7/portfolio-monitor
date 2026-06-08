@@ -828,6 +828,96 @@ def get_cpi_events(today_date):
 
     return cpi_releases
 
+def get_big_tech_earnings_events(today_date):
+    earnings_events = [
+        {
+            "event": "Nvidia - Trimestrale",
+            "date": "2026-08-28",
+            "category": "Big Tech / AI",
+            "impact": "ALTO",
+            "description": "Pubblicazione dei risultati trimestrali Nvidia.",
+            "why_it_matters": "Nvidia è uno dei principali driver del tema AI e influenza il sentiment su tecnologia e Magnificent 7.",
+            "positive_scenario": "Guidance forte: possibile supporto a tecnologia, MSCI World e AI trade.",
+            "negative_scenario": "Guidance debole: possibile correzione del comparto AI.",
+            "sensitive_assets": ["MSCI World", "Tecnologia USA", "Magnificent 7"],
+            "action": "Nessuna azione sul singolo evento. Valutare solo l'impatto sul drawdown complessivo."
+        },
+        {
+            "event": "Apple - Trimestrale",
+            "date": "2026-07-31",
+            "category": "Big Tech",
+            "impact": "MEDIO",
+            "description": "Pubblicazione dei risultati trimestrali Apple.",
+            "why_it_matters": "Apple pesa indirettamente nel portafoglio tramite MSCI World e Magnificent 7.",
+            "positive_scenario": "Guidance forte: possibile supporto a MSCI World e tecnologia USA.",
+            "negative_scenario": "Guidance debole: possibile pressione su Big Tech.",
+            "sensitive_assets": ["MSCI World", "Magnificent 7", "Tecnologia USA"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "Microsoft - Trimestrale",
+            "date": "2026-07-29",
+            "category": "Big Tech / AI",
+            "impact": "MEDIO",
+            "description": "Pubblicazione dei risultati trimestrali Microsoft.",
+            "why_it_matters": "Microsoft è tra le principali esposizioni indirette del portafoglio e rilevante per cloud, AI e software enterprise.",
+            "positive_scenario": "Crescita cloud/AI superiore alle attese: supporto a tecnologia e MSCI World.",
+            "negative_scenario": "Rallentamento cloud o guidance debole: pressione su Big Tech.",
+            "sensitive_assets": ["MSCI World", "Tecnologia USA", "Magnificent 7"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "Amazon - Trimestrale",
+            "date": "2026-07-30",
+            "category": "Big Tech",
+            "impact": "MEDIO",
+            "description": "Pubblicazione dei risultati trimestrali Amazon.",
+            "why_it_matters": "Amazon influenza il sentiment su consumer, cloud e Big Tech.",
+            "positive_scenario": "AWS e margini sopra attese: supporto a tecnologia e consumer USA.",
+            "negative_scenario": "AWS debole o margini sotto pressione: possibile pressione su Big Tech.",
+            "sensitive_assets": ["MSCI World", "Tecnologia USA", "Magnificent 7"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "Meta - Trimestrale",
+            "date": "2026-07-29",
+            "category": "Big Tech",
+            "impact": "MEDIO",
+            "description": "Pubblicazione dei risultati trimestrali Meta.",
+            "why_it_matters": "Meta pesa nella componente comunicazione/tecnologia e può influenzare il sentiment su AI e advertising digitale.",
+            "positive_scenario": "Ricavi advertising e AI engagement sopra attese: supporto a Big Tech.",
+            "negative_scenario": "Capex AI elevato o crescita debole: possibile pressione sul comparto.",
+            "sensitive_assets": ["MSCI World", "Magnificent 7", "Tecnologia USA"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "Alphabet - Trimestrale",
+            "date": "2026-07-23",
+            "category": "Big Tech / AI",
+            "impact": "MEDIO",
+            "description": "Pubblicazione dei risultati trimestrali Alphabet.",
+            "why_it_matters": "Alphabet influenza pubblicità digitale, cloud e tema AI.",
+            "positive_scenario": "Ricavi cloud e advertising solidi: supporto a tecnologia USA.",
+            "negative_scenario": "Pressione sui margini o ritardo percepito nell'AI: possibile debolezza Big Tech.",
+            "sensitive_assets": ["MSCI World", "Magnificent 7", "Tecnologia USA"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "Tesla - Trimestrale",
+            "date": "2026-07-22",
+            "category": "Big Tech / Tesla",
+            "impact": "MEDIO",
+            "description": "Pubblicazione dei risultati trimestrali Tesla.",
+            "why_it_matters": "Tesla è presente direttamente nel portafoglio e può avere volatilità specifica elevata.",
+            "positive_scenario": "Margini, consegne o guidance migliori delle attese: supporto alla posizione Tesla.",
+            "negative_scenario": "Margini deboli o guidance negativa: possibile pressione sulla posizione diretta.",
+            "sensitive_assets": ["Tesla", "MSCI World", "Magnificent 7"],
+            "action": "Nessuna azione preventiva sul singolo titolo."
+        }
+    ]
+
+    return earnings_events
+
 def generate_market_radar(market_events, kpi, drawdown, exposure):
     today_date = datetime.now().date()
     today = datetime.now().strftime("%d/%m/%Y")
@@ -837,6 +927,7 @@ def generate_market_radar(market_events, kpi, drawdown, exposure):
     automatic_events.extend(get_fed_events(today_date))
     automatic_events.extend(get_ecb_events(today_date))
     automatic_events.extend(get_cpi_events(today_date))
+    automatic_events.extend(get_big_tech_earnings_events(today_date))
 
     all_events = market_events + automatic_events
     
