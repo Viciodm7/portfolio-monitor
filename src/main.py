@@ -1,5 +1,3 @@
-from openai import OpenAI
-
 import argparse
 import json
 import os
@@ -17,6 +15,7 @@ PAC_FILE = "data/pac_config.json"
 MANUAL_TRANSACTIONS_FILE = "data/manual_transactions.csv"
 EXPOSURE_FILE = "data/portfolio_exposure.json"
 EVENTS_FILE = "data/events_watchlist.json"
+MARKET_EVENTS_FILE = "data/market_events.json"
 
 
 def load_json(file_path):
@@ -703,131 +702,133 @@ Osservazioni positive:
 
     return report
 
-def generate_market_radar(events, kpi, drawdown, exposure):
-    api_key = os.getenv("OPENAI_API_KEY")
-
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY mancante nei secrets GitHub.")
-
-    client = OpenAI(api_key=api_key)
-
+def generate_market_radar(market_events, kpi, drawdown, exposure):
+    today_date = datetime.now().date()
     today = datetime.now().strftime("%d/%m/%Y")
     drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
 
-    portfolio_context = {
-        "date": today,
-        "portfolio_value": round(kpi["total"], 2),
-        "invested_total": round(kpi["invested_total"], 2),
-        "liquidity_value": round(kpi["liquidita_value"], 2),
-        "liquidity_pct_total": round(kpi["liquidita_pct"], 2),
-        "asset_allocation_invested": {
-            "azionario": round(kpi["azionario_invested_pct"], 2),
-            "bond": round(kpi["bond_invested_pct"], 2),
-            "materie_prime": round(kpi["oro_invested_pct"], 2)
-        },
-        "risk_exposure": {
-            "usa": round(exposure["geography"].get("USA", 0), 2),
-            "tecnologia": round(exposure["sectors"].get("Tecnologia", 0), 2),
-            "magnificent_7": round(exposure["magnificent_7_weight"], 2)
-        },
-        "msci_world_drawdown": drawdown_text
+    upcoming_events = []
+
+    for event in market_events:
+        event_date = datetime.strptime(event["date"], "%Y-%m-%d").date()
+        days_left = (event_date - today_date).days
+
+        if 0 <= days_left <= 90:
+            event_copy = event.copy()
+            event_copy["days_left"] = days_left
+            upcoming_events.append(event_copy)
+
+    impact_rank = {
+        "ALTO": 1,
+        "MEDIO": 2,
+        "BASSO": 3
     }
 
-    prompt = f"""
-Agisci come market strategist per un investitore privato buy-and-hold con PAC mensile e regole Buy-The-Dip.
+    upcoming_events = sorted(
+        upcoming_events,
+        key=lambda e: (impact_rank.get(e["impact"], 9), e["days_left"])
+    )
 
-Obiettivo:
-Genera un MARKET RADAR sintetico e operativo sugli eventi reali da monitorare nei prossimi 7-30 giorni.
+    priority_events = upcoming_events[:5]
 
-Contesto portafoglio:
-{json.dumps(portfolio_context, ensure_ascii=False, indent=2)}
+    high_count = sum(1 for e in priority_events if e["impact"] == "ALTO")
 
-Eventi strutturali da considerare:
-- FED
-- BCE
-- inflazione USA
-- inflazione Eurozona
-- tassi
-- cambio EUR/USD
-- trimestrali Big Tech / AI
-- Tesla
-- Nvidia
-- Apple
-- Microsoft
-- Amazon
-- Meta
-- Alphabet
+    if high_count >= 2:
+        risk_level = "MEDIO-ALTO"
+    elif high_count == 1:
+        risk_level = "MEDIO"
+    else:
+        risk_level = "BASSO"
 
-Regole:
-- Non inventare dati numerici precisi se non sei sicuro.
-- Se non conosci una data esatta, usa formule come "nelle prossime settimane" o "prossimo mese".
-- Non dare raccomandazioni speculative.
-- Non consigliare acquisti o vendite anticipati.
-- Qualsiasi azione operativa deve restare vincolata ai trigger Buy-The-Dip del Portfolio Radar.
-- Il report deve essere in italiano.
-- Stile: chiaro, sintetico, orientato all'impatto sul portafoglio.
-
-Formato obbligatorio:
-
-🌍 MARKET RADAR
+    report = f"""🌍 MARKET RADAR
 📅 {today}
 
 ━━━━━━━━━━━━━━━━━━
 
 🟡 RISCHIO EVENTI
-[ basso / medio / alto con breve motivazione ]
+
+Livello:
+{risk_level}
+
+Sintesi:
+Nei prossimi 90 giorni il radar monitora eventi macro e societari potenzialmente rilevanti per il portafoglio.
+
+Il report non genera acquisti o vendite automatiche.
+Le decisioni operative restano governate dal Portfolio Radar.
+
+━━━━━━━━━━━━━━━━━━
+
+📊 SENSIBILITÀ PORTAFOGLIO
+
+USA:
+{exposure["geography"].get("USA", 0):.1f}%
+
+Tecnologia:
+{exposure["sectors"].get("Tecnologia", 0):.1f}%
+
+Magnificent 7:
+{exposure["magnificent_7_weight"]:.1f}%
+
+MSCI World drawdown:
+{drawdown_text}
 
 ━━━━━━━━━━━━━━━━━━
 
 🔥 EVENTI PRIORITARI
 
-1️⃣ [Evento]
-Quando:
-[Data o finestra temporale]
-
-Perché conta:
-[Impatto sul portafoglio]
-
-Cosa aspettarsi:
-• Scenario positivo
-• Scenario negativo
-
-Asset più sensibili:
-• ...
-
-Azione:
-[sempre prudente, nessuna azione preventiva salvo trigger]
-
-Ripeti massimo 5 eventi.
-
-━━━━━━━━━━━━━━━━━━
-
-💵 CAMBIO EUR/USD
-
-Lettura:
-[breve]
-
-Impatto:
-[breve]
-
-Azione:
-[breve]
-
-━━━━━━━━━━━━━━━━━━
-
-📌 CONCLUSIONE OPERATIVA
-
-• ...
-• ...
-• ...
 """
 
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=prompt
-    )
+    if not priority_events:
+        report += "Nessun evento prioritario registrato nei prossimi 90 giorni.\n"
+    else:
+        for index, event in enumerate(priority_events, start=1):
+            event_date = datetime.strptime(event["date"], "%Y-%m-%d").strftime("%d/%m/%Y")
+            assets = "\n".join([f"• {asset}" for asset in event["sensitive_assets"]])
 
-    return response.output_text
+            report += f"""{index}️⃣ {event["event"]}
+
+Data:
+{event_date}
+
+Mancano:
+{event["days_left"]} giorni
+
+Categoria:
+{event["category"]}
+
+Impatto:
+{event["impact"]}
+
+Cosa succederà:
+{event["description"]}
+
+Perché conta:
+{event["why_it_matters"]}
+
+Scenario positivo:
+{event["positive_scenario"]}
+
+Scenario negativo:
+{event["negative_scenario"]}
+
+Asset sensibili:
+{assets}
+
+Azione:
+{event["action"]}
+
+━━━━━━━━━━━━━━━━━━
+
+"""
+
+    report += """📌 CONCLUSIONE OPERATIVA
+
+• Nessuna azione preventiva.
+• Monitorare solo gli eventi ad alto impatto.
+• Usare la liquidità tattica solo se il Portfolio Radar attiva un trigger Buy-The-Dip.
+"""
+
+    return report
 
 def generate_pac_message(pac_config):
     amounts = pac_config["monthly_amounts"]
@@ -941,6 +942,7 @@ def build_context():
     manual_transactions = load_manual_transactions()
     exposure_model = load_json(EXPOSURE_FILE)
     events = load_json(EVENTS_FILE)
+    market_events = load_json(MARKET_EVENTS_FILE)
 
     today = datetime.now().date()
     start_date = state["portfolio_start_date"]
@@ -983,7 +985,8 @@ def build_context():
         "pac_count": pac_count,
         "exposure": exposure,
         "events": events,
-        "manual_transactions": manual_transactions
+        "manual_transactions": manual_transactions,
+        "market_events": market_events
     }
 
 
@@ -1019,7 +1022,7 @@ def main():
 
     elif args.mode == "market":
         report = generate_market_radar(
-            context["events"],
+            context["market_events"],
             context["kpi"],
             context["drawdown"],
             context["exposure"]
