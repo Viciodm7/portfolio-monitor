@@ -1,0 +1,62 @@
+[
+  {
+    "event": "FED - Riunione FOMC",
+    "date": "2026-06-17",
+    "category": "Macro USA",
+    "impact": "ALTO",
+    "description": "La Federal Reserve comunicherà la decisione sui tassi e aggiornerà il quadro di politica monetaria.",
+    "why_it_matters": "I tassi USA influenzano tecnologia, MSCI World, dollaro e Magnificent 7.",
+    "positive_scenario": "Tono accomodante o apertura a futuri tagli: possibile supporto a growth, tecnologia e MSCI World.",
+    "negative_scenario": "Tono restrittivo: possibile pressione su Nasdaq, Tesla e Magnificent 7.",
+    "sensitive_assets": ["MSCI World", "Tesla", "Tecnologia USA", "Magnificent 7"],
+    "action": "Nessuna azione preventiva. Agire solo se il Portfolio Radar attiva un trigger Buy-The-Dip."
+  },
+  {
+    "event": "BCE - Riunione politica monetaria",
+    "date": "2026-06-11",
+    "category": "Macro Europa",
+    "impact": "MEDIO",
+    "description": "La BCE comunicherà la decisione di politica monetaria e aggiornerà il messaggio sui tassi.",
+    "why_it_matters": "Impatta euro, bond e condizioni finanziarie europee.",
+    "positive_scenario": "Toni accomodanti: possibile supporto ai bond.",
+    "negative_scenario": "Toni restrittivi: possibile pressione sull'obbligazionario.",
+    "sensitive_assets": ["Bond Globali", "EUR/USD", "Azionario Europa"],
+    "action": "Nessuna azione operativa."
+  },
+  {
+    "event": "Inflazione USA - CPI",
+    "date": "2026-06-12",
+    "category": "Macro USA",
+    "impact": "ALTO",
+    "description": "Pubblicazione dell'indice dei prezzi al consumo USA e della componente core.",
+    "why_it_matters": "Il CPI influenza le aspettative sui tassi FED e le valutazioni dei titoli growth.",
+    "positive_scenario": "Dato sotto le attese: possibile supporto a tecnologia, MSCI World e bond.",
+    "negative_scenario": "Dato sopra le attese: possibile pressione su Nasdaq, tecnologia e obbligazionario.",
+    "sensitive_assets": ["MSCI World", "Bond Globali", "Tecnologia USA", "EUR/USD"],
+    "action": "Monitorare. Nessun acquisto anticipato."
+  },
+  {
+    "event": "Nvidia - Trimestrale",
+    "date": "2026-08-28",
+    "category": "Big Tech / AI",
+    "impact": "ALTO",
+    "description": "Pubblicazione dei risultati trimestrali Nvidia.",
+    "why_it_matters": "Nvidia è uno dei principali driver del tema AI e influenza il sentiment su tecnologia e Magnificent 7.",
+    "positive_scenario": "Guidance forte: possibile supporto a tecnologia, MSCI World e AI trade.",
+    "negative_scenario": "Guidance debole: possibile correzione del comparto AI.",
+    "sensitive_assets": ["MSCI World", "Tecnologia USA", "Magnificent 7"],
+    "action": "Nessuna azione sul singolo evento. Valutare solo l'impatto sul drawdown complessivo."
+  },
+  {
+    "event": "Apple - Trimestrale",
+    "date": "2026-07-31",
+    "category": "Big Tech",
+    "impact": "MEDIO",
+    "description": "Pubblicazione dei risultati trimestrali Apple.",
+    "why_it_matters": "Apple pesa indirettamente nel portafoglio tramite MSCI World e Magnificent 7.",
+    "positive_scenario": "Guidance forte: possibile supporto a MSCI World e tecnologia USA.",
+    "negative_scenario": "Guidance debole: possibile pressione su Big Tech.",
+    "sensitive_assets": ["MSCI World", "Magnificent 7", "Tecnologia USA"],
+    "action": "Nessuna azione preventiva."
+  }
+]
