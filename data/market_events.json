@@ -1,17 +1,5 @@
 [
   {
-    "event": "FED - Riunione FOMC",
-    "date": "2026-06-17",
-    "category": "Macro USA",
-    "impact": "ALTO",
-    "description": "La Federal Reserve comunicherà la decisione sui tassi e aggiornerà il quadro di politica monetaria.",
-    "why_it_matters": "I tassi USA influenzano tecnologia, MSCI World, dollaro e Magnificent 7.",
-    "positive_scenario": "Tono accomodante o apertura a futuri tagli: possibile supporto a growth, tecnologia e MSCI World.",
-    "negative_scenario": "Tono restrittivo: possibile pressione su Nasdaq, Tesla e Magnificent 7.",
-    "sensitive_assets": ["MSCI World", "Tesla", "Tecnologia USA", "Magnificent 7"],
-    "action": "Nessuna azione preventiva. Agire solo se il Portfolio Radar attiva un trigger Buy-The-Dip."
-  },
-  {
     "event": "BCE - Riunione politica monetaria",
     "date": "2026-06-11",
     "category": "Macro Europa",
