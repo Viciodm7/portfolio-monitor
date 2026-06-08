@@ -704,74 +704,130 @@ Osservazioni positive:
     return report
 
 def generate_market_radar(events, kpi, drawdown, exposure):
+    api_key = os.getenv("OPENAI_API_KEY")
+
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY mancante nei secrets GitHub.")
+
+    client = OpenAI(api_key=api_key)
+
     today = datetime.now().strftime("%d/%m/%Y")
     drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
 
-    report = f"""🌍 MARKET RADAR
+    portfolio_context = {
+        "date": today,
+        "portfolio_value": round(kpi["total"], 2),
+        "invested_total": round(kpi["invested_total"], 2),
+        "liquidity_value": round(kpi["liquidita_value"], 2),
+        "liquidity_pct_total": round(kpi["liquidita_pct"], 2),
+        "asset_allocation_invested": {
+            "azionario": round(kpi["azionario_invested_pct"], 2),
+            "bond": round(kpi["bond_invested_pct"], 2),
+            "materie_prime": round(kpi["oro_invested_pct"], 2)
+        },
+        "risk_exposure": {
+            "usa": round(exposure["geography"].get("USA", 0), 2),
+            "tecnologia": round(exposure["sectors"].get("Tecnologia", 0), 2),
+            "magnificent_7": round(exposure["magnificent_7_weight"], 2)
+        },
+        "msci_world_drawdown": drawdown_text
+    }
+
+    prompt = f"""
+Agisci come market strategist per un investitore privato buy-and-hold con PAC mensile e regole Buy-The-Dip.
+
+Obiettivo:
+Genera un MARKET RADAR sintetico e operativo sugli eventi reali da monitorare nei prossimi 7-30 giorni.
+
+Contesto portafoglio:
+{json.dumps(portfolio_context, ensure_ascii=False, indent=2)}
+
+Eventi strutturali da considerare:
+- FED
+- BCE
+- inflazione USA
+- inflazione Eurozona
+- tassi
+- cambio EUR/USD
+- trimestrali Big Tech / AI
+- Tesla
+- Nvidia
+- Apple
+- Microsoft
+- Amazon
+- Meta
+- Alphabet
+
+Regole:
+- Non inventare dati numerici precisi se non sei sicuro.
+- Se non conosci una data esatta, usa formule come "nelle prossime settimane" o "prossimo mese".
+- Non dare raccomandazioni speculative.
+- Non consigliare acquisti o vendite anticipati.
+- Qualsiasi azione operativa deve restare vincolata ai trigger Buy-The-Dip del Portfolio Radar.
+- Il report deve essere in italiano.
+- Stile: chiaro, sintetico, orientato all'impatto sul portafoglio.
+
+Formato obbligatorio:
+
+🌍 MARKET RADAR
 📅 {today}
 
 ━━━━━━━━━━━━━━━━━━
 
-🎯 OBIETTIVO
-
-Monitorare gli eventi macro e societari che possono influenzare il portafoglio.
-
-Questo report non genera azioni operative automatiche.
-Le azioni restano governate dai trigger del Portfolio Radar.
-
-━━━━━━━━━━━━━━━━━━
-
-📊 SENSIBILITÀ PORTAFOGLIO
-
-USA:
-{exposure["geography"].get("USA", 0):.1f}%
-
-Tecnologia:
-{exposure["sectors"].get("Tecnologia", 0):.1f}%
-
-Magnificent 7:
-{exposure["magnificent_7_weight"]:.1f}%
-
-MSCI World drawdown:
-{drawdown_text}
+🟡 RISCHIO EVENTI
+[ basso / medio / alto con breve motivazione ]
 
 ━━━━━━━━━━━━━━━━━━
 
 🔥 EVENTI PRIORITARI
 
-"""
-
-    for event in events:
-        report += f"""▶ {event["event"]} — {event["category"]} — Rilevanza {event["relevance"]}
+1️⃣ [Evento]
+Quando:
+[Data o finestra temporale]
 
 Perché conta:
-{event["why_it_matters"]}
+[Impatto sul portafoglio]
 
-Scenario positivo:
-{event["positive_impact"]}
+Cosa aspettarsi:
+• Scenario positivo
+• Scenario negativo
 
-Scenario negativo:
-{event["negative_impact"]}
+Asset più sensibili:
+• ...
 
 Azione:
-{event["action"]}
+[sempre prudente, nessuna azione preventiva salvo trigger]
 
----
-"""
+Ripeti massimo 5 eventi.
 
-    report += """
 ━━━━━━━━━━━━━━━━━━
 
-📌 CONCLUSIONE
+💵 CAMBIO EUR/USD
 
-Nessuna azione preventiva da compiere.
+Lettura:
+[breve]
 
-Il Market Radar serve a prepararsi agli eventi, non ad anticipare il mercato.
+Impatto:
+[breve]
 
-Eventuali acquisti straordinari restano vincolati ai trigger Buy-The-Dip.
+Azione:
+[breve]
+
+━━━━━━━━━━━━━━━━━━
+
+📌 CONCLUSIONE OPERATIVA
+
+• ...
+• ...
+• ...
 """
 
-    return report
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input=prompt
+    )
+
+    return response.output_text
 
 def generate_pac_message(pac_config):
     amounts = pac_config["monthly_amounts"]
