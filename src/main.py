@@ -768,6 +768,66 @@ def get_fed_events(today_date):
 
     return fed_meetings
 
+def get_ecb_events(today_date):
+    ecb_meetings = [
+        {
+            "event": "BCE - Riunione politica monetaria",
+            "date": "2026-06-11",
+            "category": "Macro Europa",
+            "impact": "MEDIO",
+            "description": "La BCE comunicherà la decisione di politica monetaria e aggiornerà il messaggio sui tassi.",
+            "why_it_matters": "Impatta euro, bond e condizioni finanziarie europee.",
+            "positive_scenario": "Toni accomodanti: possibile supporto ai bond.",
+            "negative_scenario": "Toni restrittivi: possibile pressione sull'obbligazionario.",
+            "sensitive_assets": ["Bond Globali", "EUR/USD", "Azionario Europa"],
+            "action": "Nessuna azione operativa."
+        },
+        {
+            "event": "BCE - Riunione politica monetaria",
+            "date": "2026-09-10",
+            "category": "Macro Europa",
+            "impact": "MEDIO",
+            "description": "La BCE comunicherà la decisione di politica monetaria e terrà la conferenza stampa.",
+            "why_it_matters": "Influenza euro, bond e sentiment sugli asset europei.",
+            "positive_scenario": "Messaggio più accomodante: possibile sostegno alla componente obbligazionaria.",
+            "negative_scenario": "Messaggio restrittivo: possibile pressione su bond e condizioni finanziarie.",
+            "sensitive_assets": ["Bond Globali", "EUR/USD", "Azionario Europa"],
+            "action": "Nessuna azione preventiva."
+        },
+        {
+            "event": "BCE - Riunione politica monetaria",
+            "date": "2026-12-17",
+            "category": "Macro Europa",
+            "impact": "MEDIO",
+            "description": "La BCE comunicherà la decisione di politica monetaria di fine anno.",
+            "why_it_matters": "Può influenzare aspettative su tassi europei, euro e bond.",
+            "positive_scenario": "Toni accomodanti: supporto a obbligazionario e condizioni finanziarie.",
+            "negative_scenario": "Toni restrittivi: possibile pressione su bond.",
+            "sensitive_assets": ["Bond Globali", "EUR/USD", "Azionario Europa"],
+            "action": "Nessuna azione operativa."
+        }
+    ]
+
+    return ecb_meetings
+
+def get_cpi_events(today_date):
+    cpi_releases = [
+        {
+            "event": "Inflazione USA - CPI",
+            "date": "2026-06-10",
+            "category": "Macro USA",
+            "impact": "ALTO",
+            "description": "Pubblicazione dell'indice dei prezzi al consumo USA e della componente core.",
+            "why_it_matters": "Il CPI influenza le aspettative sui tassi FED e le valutazioni dei titoli growth.",
+            "positive_scenario": "Dato sotto le attese: possibile supporto a tecnologia, MSCI World e bond.",
+            "negative_scenario": "Dato sopra le attese: possibile pressione su Nasdaq, tecnologia e obbligazionario.",
+            "sensitive_assets": ["MSCI World", "Bond Globali", "Tecnologia USA", "EUR/USD"],
+            "action": "Monitorare. Nessun acquisto anticipato."
+        }
+    ]
+
+    return cpi_releases
+
 def generate_market_radar(market_events, kpi, drawdown, exposure):
     today_date = datetime.now().date()
     today = datetime.now().strftime("%d/%m/%Y")
@@ -775,6 +835,8 @@ def generate_market_radar(market_events, kpi, drawdown, exposure):
 
     automatic_events = []
     automatic_events.extend(get_fed_events(today_date))
+    automatic_events.extend(get_ecb_events(today_date))
+    automatic_events.extend(get_cpi_events(today_date))
 
     all_events = market_events + automatic_events
     
