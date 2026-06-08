@@ -795,13 +795,40 @@ def generate_market_radar(market_events, kpi, drawdown, exposure):
         "BASSO": 3
     }
 
-    upcoming_events = sorted(
-        upcoming_events,
-        key=lambda e: (impact_rank.get(e["impact"], 9), e["days_left"])
-    )
+        def event_family(event_name):
+        return event_name.split("-")[0].strip()
+
+    filtered_events = {}
+
+    for event in upcoming_events:
+        family = event_family(event["event"])
+
+        if family not in filtered_events:
+            filtered_events[family] = event
+        else:
+            if event["days_left"] < filtered_events[family]["days_left"]:
+                filtered_events[family] = event
+
+    upcoming_events = list(filtered_events.values())
+
+    def priority_score(event):
+        days = event["days_left"]
+        impact = impact_rank.get(event["impact"], 9)
+
+        if days <= 14:
+            urgency = 0
+        elif days <= 30:
+            urgency = 1
+        elif days <= 60:
+            urgency = 2
+        else:
+            urgency = 3
+
+        return (urgency, impact, days)
+
+    upcoming_events = sorted(upcoming_events, key=priority_score)
 
     priority_events = upcoming_events[:5]
-
     high_count = sum(1 for e in priority_events if e["impact"] == "ALTO")
 
     if high_count >= 2:
@@ -822,7 +849,7 @@ Livello:
 {risk_level}
 
 Sintesi:
-Nei prossimi 90 giorni il radar monitora eventi macro e societari potenzialmente rilevanti per il portafoglio.
+Il radar mostra gli eventi più rilevanti ordinati per vicinanza temporale, impatto e sensibilità sul portafoglio.
 
 Il report non genera acquisti o vendite automatiche.
 Le decisioni operative restano governate dal Portfolio Radar.
@@ -960,7 +987,6 @@ Liquidità tattica stimata:
 {format_money(kpi["liquidita_value"])}
 """
 
-
 def send_telegram(message):
     if os.getenv("SEND_TELEGRAM", "false").lower() != "true":
         return
@@ -973,11 +999,34 @@ def send_telegram(message):
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
 
-    max_length = 3500
-    chunks = [
-        message[i:i + max_length]
-        for i in range(0, len(message), max_length)
-    ]
+        max_length = 3500
+    sections = message.split("━━━━━━━━━━━━━━━━━━")
+    chunks = []
+    current_chunk = ""
+
+    for section in sections:
+        section_text = section.strip()
+
+        if not section_text:
+            continue
+
+        candidate = (
+            current_chunk
+            + "\n\n━━━━━━━━━━━━━━━━━━\n\n"
+            + section_text
+            if current_chunk
+            else section_text
+        )
+
+        if len(candidate) <= max_length:
+            current_chunk = candidate
+        else:
+            if current_chunk:
+                chunks.append(current_chunk)
+            current_chunk = section_text
+
+    if current_chunk:
+        chunks.append(current_chunk)
 
     total_chunks = len(chunks)
 
