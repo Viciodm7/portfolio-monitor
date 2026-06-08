@@ -809,9 +809,9 @@ def generate_market_radar(market_events, kpi, drawdown, exposure):
             if event["days_left"] < filtered_events[family]["days_left"]:
                 filtered_events[family] = event
 
-    upcoming_events = list(filtered_events.values())
+        upcoming_events = list(filtered_events.values())
 
-        def priority_score(event):
+    def priority_score(event):
         days = event["days_left"]
         impact = impact_rank.get(event["impact"], 9)
 
