@@ -700,6 +700,77 @@ Osservazioni positive:
         report += f"• {item}\n"
 
     return report
+
+def generate_market_radar(events, kpi, drawdown, exposure):
+    today = datetime.now().strftime("%d/%m/%Y")
+    drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
+
+    report = f"""🌍 MARKET RADAR
+📅 {today}
+
+━━━━━━━━━━━━━━━━━━
+
+🎯 OBIETTIVO
+
+Monitorare gli eventi macro e societari che possono influenzare il portafoglio.
+
+Questo report non genera azioni operative automatiche.
+Le azioni restano governate dai trigger del Portfolio Radar.
+
+━━━━━━━━━━━━━━━━━━
+
+📊 SENSIBILITÀ PORTAFOGLIO
+
+USA:
+{exposure["geography"].get("USA", 0):.1f}%
+
+Tecnologia:
+{exposure["sectors"].get("Tecnologia", 0):.1f}%
+
+Magnificent 7:
+{exposure["magnificent_7_weight"]:.1f}%
+
+MSCI World drawdown:
+{drawdown_text}
+
+━━━━━━━━━━━━━━━━━━
+
+🔥 EVENTI PRIORITARI
+
+"""
+
+    for event in events:
+        report += f"""▶ {event["event"]} — {event["category"]} — Rilevanza {event["relevance"]}
+
+Perché conta:
+{event["why_it_matters"]}
+
+Scenario positivo:
+{event["positive_impact"]}
+
+Scenario negativo:
+{event["negative_impact"]}
+
+Azione:
+{event["action"]}
+
+---
+"""
+
+    report += """
+━━━━━━━━━━━━━━━━━━
+
+📌 CONCLUSIONE
+
+Nessuna azione preventiva da compiere.
+
+Il Market Radar serve a prepararsi agli eventi, non ad anticipare il mercato.
+
+Eventuali acquisti straordinari restano vincolati ai trigger Buy-The-Dip.
+"""
+
+    return report
+
 def generate_pac_message(pac_config):
     amounts = pac_config["monthly_amounts"]
     total = sum(float(v) for v in amounts.values())
@@ -860,7 +931,7 @@ def build_context():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["weekly", "daily", "monthly"], default="weekly")
+    parser.add_argument("--mode", choices=["weekly", "daily", "monthly", "market"], default="weekly")
     args = parser.parse_args()
 
     context = build_context()
@@ -884,6 +955,18 @@ def main():
         save_report(report)
         send_telegram(report)
 
+        elif args.mode == "market":
+        report = generate_market_radar(
+            context["events"],
+            context["kpi"],
+            context["drawdown"],
+            context["exposure"]
+        )
+
+        print(report)
+        save_report(report)
+        send_telegram(report)
+    
     elif args.mode == "monthly":
         report = generate_monthly_report(
     context["portfolio"],
