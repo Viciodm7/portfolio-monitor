@@ -795,7 +795,7 @@ def generate_market_radar(market_events, kpi, drawdown, exposure):
         "BASSO": 3
     }
 
-        def event_family(event_name):
+    def event_family(event_name):
         return event_name.split("-")[0].strip()
 
     filtered_events = {}
@@ -811,7 +811,7 @@ def generate_market_radar(market_events, kpi, drawdown, exposure):
 
     upcoming_events = list(filtered_events.values())
 
-    def priority_score(event):
+        def priority_score(event):
         days = event["days_left"]
         impact = impact_rank.get(event["impact"], 9)
 
