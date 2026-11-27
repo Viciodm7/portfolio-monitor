@@ -229,17 +229,14 @@ def get_btd_status(config, drawdown, liquidity_value):
     rules = config["buy_the_dip_rules"]
 
     if drawdown <= rules["level_3"]["threshold"]:
-        rule = rules["level_3"]
+        level_key = "level_3"
         level = "LIVELLO 3"
-        is_action = True
     elif drawdown <= rules["level_2"]["threshold"]:
-        rule = rules["level_2"]
+        level_key = "level_2"
         level = "LIVELLO 2"
-        is_action = True
     elif drawdown <= rules["level_1"]["threshold"]:
-        rule = rules["level_1"]
+        level_key = "level_1"
         level = "LIVELLO 1"
-        is_action = True
     elif drawdown <= rules["pre_trigger"]["threshold"]:
         return {
             "level": "pre_trigger",
@@ -271,17 +268,26 @@ def get_btd_status(config, drawdown, liquidity_value):
             "em_amount": 0.0
         }
 
+    else:
+        return {
+            "level": "normal",
+            "label": "NON ATTIVO",
+            "is_action": False,
+            "message": "Nessun trigger Buy-The-Dip attivo.",
+            "amount_to_use": 0.0,
+            "msci_amount": 0.0,
+            "em_amount": 0.0
+        }
+
     return {
-        "level": "normal",
-        "label": "NON ATTIVO",
-        "is_action": False,
-        "message": "Nessun trigger Buy-The-Dip attivo.",
+        "level": level_key,
+        "label": level,
+        "is_action": True,
+        "message": f"Trigger Buy-The-Dip {level} attivo.",
         "amount_to_use": 0.0,
         "msci_amount": 0.0,
         "em_amount": 0.0
     }
-
-    amount_to_use = 0.0
 
 
 def generate_actions(btd_status):
