@@ -172,11 +172,12 @@ def calculate_kpi(current_portfolio, initial_total, pac_total, manual_total):
 
     oro = current_portfolio[current_portfolio["asset_class"] == "Oro"]["current_value"].sum()
 
-    liquidita = current_portfolio[
-        current_portfolio["asset_class"].str.contains("Liquidità")
-    ]["current_value"].sum()
-
-    invested_total = total - liquidita
+    cash_mask = current_portfolio["ticker"].eq("CASH")
+    overnight_mask = current_portfolio["ticker"].eq("XEON.MI")
+    cash = current_portfolio.loc[cash_mask, "current_value"].sum()
+    overnight = current_portfolio.loc[overnight_mask, "current_value"].sum()
+    liquidita = cash + overnight
+    invested_total = current_portfolio.loc[~(cash_mask | overnight_mask), "current_value"].sum()
 
     azionario_invested_pct = azionario / invested_total * 100 if invested_total else 0
     bond_invested_pct = bond / invested_total * 100 if invested_total else 0
@@ -190,11 +191,13 @@ def calculate_kpi(current_portfolio, initial_total, pac_total, manual_total):
         "manual_total": manual_total,
         "market_effect": market_effect,
         "performance_pct": performance_pct,
-        "azionario_pct": azionario / total * 100,
-        "bond_pct": bond / total * 100,
-        "oro_pct": oro / total * 100,
-        "liquidita_pct": liquidita / total * 100,
+        "azionario_pct": azionario / total * 100 if total else 0,
+        "bond_pct": bond / total * 100 if total else 0,
+        "oro_pct": oro / total * 100 if total else 0,
+        "liquidita_pct": liquidita / total * 100 if total else 0,
         "liquidita_value": liquidita,
+        "cash_value": cash,
+        "overnight_value": overnight,
         "invested_total": invested_total,
         "azionario_invested_pct": azionario_invested_pct,
         "bond_invested_pct": bond_invested_pct,
@@ -463,23 +466,8 @@ def generate_dynamic_conclusions(kpi, btd_status, pac_count):
             f"⚠️ Materie prime sopra target: {kpi['oro_invested_pct']:.1f}% rispetto al target 10%."
         )
 
-    if kpi["performance_pct"] > 2:
-        conclusions.append(
-            f"✓ Effetto mercato positivo: +{kpi['performance_pct']:.2f}%."
-        )
-    elif kpi["performance_pct"] < -2:
-        warnings.append(
-            f"⚠️ Effetto mercato negativo: {kpi['performance_pct']:.2f}%."
-        )
-    else:
-        conclusions.append(
-            f"✓ Effetto mercato contenuto: {kpi['performance_pct']:.2f}%."
-        )
-
-    if pac_count > 0:
-        conclusions.append(f"✓ PAC regolare conteggiato: {pac_count} mensilità.")
-    else:
-        warnings.append("⚠️ Nessun PAC mensile ancora conteggiato.")
+    conclusions.append(f"PAC a calendario: {pac_count} mensilità previste.")
+    warnings.append("Esecuzioni PAC e performance effettiva da riconciliare con il broker.")
 
     if btd_status["is_action"]:
         warnings.append(f"🚨 Trigger Buy-The-Dip {btd_status['label']} attivo.")
@@ -509,32 +497,29 @@ def generate_monthly_report(current_portfolio, kpi, pac_count, manual_transactio
 
 💰 PATRIMONIO
 
-Valore attuale:
+Valore stimato da baseline storica e flussi ipotizzati:
 {format_money(kpi["total"])}
 
-Capitale iniziale:
+Valore della baseline storica:
 {format_money(kpi["initial_total"])}
 
-PAC accumulati:
+PAC previsti a calendario:
 {format_money(kpi["pac_total"])}
 
-Extra manuali:
+Extra registrati:
 {format_money(kpi["manual_total"])}
 
-Effetto mercato:
-{format_money(kpi["market_effect"])}
-
-Performance:
-{kpi["performance_pct"]:.2f}%
+Performance effettiva: da verificare sui movimenti e sulle valutazioni del broker.
 
 ━━━━━━━━━━━━━━━━━━
 
-⚖️ ASSET ALLOCATION
+⚖️ ALLOCAZIONE STRATEGICA (esclusi cash e Overnight)
 
-Azionario: {kpi["azionario_pct"]:.1f}% / target 80%
-Bond: {kpi["bond_pct"]:.1f}% / target 10%
-Materie prime: {kpi["oro_pct"]:.1f}% / target 10%
-Liquidità: {kpi["liquidita_pct"]:.1f}%
+Azionario: {kpi["azionario_invested_pct"]:.1f}% / target 80%
+Bond: {kpi["bond_invested_pct"]:.1f}% / target 10%
+Materie prime: {kpi["oro_invested_pct"]:.1f}% / target 10%
+Cash stimato: {format_money(kpi["cash_value"])}
+Overnight stimato: {format_money(kpi["overnight_value"])}
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -616,14 +601,10 @@ Valutazione: {status_text}
 
 💰 PATRIMONIO
 
-Valore attuale:
+Valore stimato da baseline storica e flussi ipotizzati:
 {format_money(kpi["total"])}
 
-Effetto mercato:
-{format_money(kpi["market_effect"])}
-
-Performance:
-{kpi["performance_pct"]:.2f}%
+Performance effettiva: da verificare sui movimenti e sulle valutazioni del broker.
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -649,8 +630,8 @@ Azionario: {kpi["azionario_invested_pct"]:.1f}% / target 80%
 Bond: {kpi["bond_invested_pct"]:.1f}% / target 10%
 Materie prime: {kpi["oro_invested_pct"]:.1f}% / target 10%
 
-Liquidità tattica:
-{format_money(kpi["liquidita_value"])} ({kpi["liquidita_pct"]:.1f}% del patrimonio totale)
+Cash stimato: {format_money(kpi["cash_value"])}
+Overnight stimato: {format_money(kpi["overnight_value"])}
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -1111,7 +1092,7 @@ Da eseguire oggi:
 Totale:
 {format_money(total)}
 
-Dopo l'esecuzione non devi aggiornare nulla: il sistema conteggia automaticamente il PAC mensile.
+Il calendario rappresenta la pianificazione. Le esecuzioni richiedono riscontro nei movimenti del broker.
 """
 
     return message
