@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 from datetime import date, datetime
+from fractions import Fraction
+from math import isfinite
 
 import pandas as pd
 import requests
@@ -208,10 +210,15 @@ def calculate_msci_world_drawdown():
     if history.empty:
         return None
 
-    current_price = float(history["Close"].iloc[-1])
-    max_price = float(history["Close"].max())
+    current_price = history["Close"].iloc[-1]
+    max_price = history["Close"].max()
+    if not (isfinite(current_price) and isfinite(max_price)):
+        return ((float(current_price) / float(max_price)) - 1) * 100
 
-    return ((current_price / max_price) - 1) * 100
+    # Keep the price ratio exact until the inclusive BTD comparisons.
+    current = Fraction(str(current_price))
+    peak = Fraction(str(max_price))
+    return (current - peak) * 100 / peak
 
 
 def get_btd_status(config, drawdown, liquidity_value):
@@ -579,7 +586,7 @@ Osservazioni positive:
 
 def generate_weekly_report(current_portfolio, kpi, alerts, actions, drawdown, btd_status, health_score, pac_count, exposure, events, manual_transactions):
     today = datetime.now().strftime("%d/%m/%Y")
-    drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
+    drawdown_text = "N/D" if drawdown is None else f"{float(drawdown):.1f}%"
 
     status_icon = "🟢" if health_score >= 80 else "🟡" if health_score >= 65 else "🔴"
     status_text = "BUONO" if health_score >= 80 else "ATTENZIONE" if health_score >= 65 else "CRITICO"
@@ -927,7 +934,7 @@ def get_big_tech_earnings_events(today_date):
 def generate_market_radar(market_events, kpi, drawdown, exposure):
     today_date = datetime.now().date()
     today = datetime.now().strftime("%d/%m/%Y")
-    drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
+    drawdown_text = "N/D" if drawdown is None else f"{float(drawdown):.1f}%"
 
     automatic_events = []
     automatic_events.extend(get_fed_events(today_date))
@@ -1114,7 +1121,7 @@ def generate_daily_event_message(btd_status, drawdown, kpi):
     if btd_status["level"] == "normal":
         return None
 
-    drawdown_text = "N/D" if drawdown is None else f"{drawdown:.1f}%"
+    drawdown_text = "N/D" if drawdown is None else f"{float(drawdown):.1f}%"
 
     if btd_status["is_action"]:
         title = f"🚨 BUY-THE-DIP {btd_status['label']}"
